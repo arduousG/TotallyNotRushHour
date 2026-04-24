@@ -426,6 +426,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &528226234 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1705168677134304731, guid: 853e269ccd51d4a74b4fb64211cc7081, type: 3}
+  m_PrefabInstance: {fileID: 133638619935898790}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &528226235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 528226234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bf96e4adc2454d42a9f50dd78beb538, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  boardTilePrefab: {fileID: 8851917254948447292, guid: 24bd1ac55d96c48dd9cc74cd3d303ab1, type: 3}
+  carPrefab: {fileID: 7954358756618154438, guid: 3ed4a57d622e148588adc7c377700977, type: 3}
+  boardWidth: 6
+  boardHeight: 6
+  tileSpacing: 6
 --- !u!1 &1164023236
 GameObject:
   m_ObjectHideFlags: 0
@@ -618,7 +640,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1705168677134304731, guid: 853e269ccd51d4a74b4fb64211cc7081, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 528226235}
   m_SourcePrefab: {fileID: 100100000, guid: 853e269ccd51d4a74b4fb64211cc7081, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
