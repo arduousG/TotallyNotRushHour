@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PuzzleController : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class PuzzleController : MonoBehaviour
     public bool IsGameWon => gameWon;
 
     private CarController[,] grid;
+    private Dictionary<CarController, Vector2Int> startingPositions = 
+        new Dictionary<CarController, Vector2Int>();
 
     // Puzzle Definition
     [System.Serializable]
@@ -37,6 +40,14 @@ public class PuzzleController : MonoBehaviour
         grid = new CarController[boardWidth, boardHeight];
         SpawnCars();
         SpawnExit();
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ResetPuzzle();
+        }
     }
 
     // Generating a 6x6 board
@@ -113,6 +124,8 @@ public class PuzzleController : MonoBehaviour
                 controller.length = car.length;
                 controller.tileSpacing = tileSpacing;
                 controller.isMainCar = car.isMainCar;
+
+                startingPositions[controller] = car.gridPosition;
             }
 
             grid[car.gridPosition.x, car.gridPosition.y] = controller;
@@ -220,5 +233,36 @@ public class PuzzleController : MonoBehaviour
 
         if (winText != null)
             winText.SetActive(true);
+    }
+
+    public void ResetPuzzle()
+    {
+        gameWon = false;
+
+        if (winText != null)
+            winText.SetActive(false);
+
+        grid = new CarController[boardWidth, boardHeight];
+
+        foreach (var pair in startingPositions)
+        {
+            CarController car = pair.Key;
+            Vector2Int startPos = pair.Value;
+
+            car.gridPosition = startPos;
+            car.transform.position = GridToWorld(
+                startPos,
+                car.isHorizontal,
+                car.length
+            );
+
+            foreach (var cell in car.GetOccupiedCells(startPos))
+            {
+                if (IsInsideBoard(cell))
+                {
+                    grid[cell.x, cell.y] = car;
+                }
+            }
+        }
     }
 }
