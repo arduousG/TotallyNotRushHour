@@ -351,17 +351,52 @@ MonoBehaviour:
     isMainCar: 1
     isHorizontal: 1
     length: 2
-    gridPosition: {x: 4, y: 3}
+    gridPosition: {x: 0, y: 3}
   - carId: 2
+    isMainCar: 0
+    isHorizontal: 1
+    length: 3
+    gridPosition: {x: 0, y: 2}
+  - carId: 3
+    isMainCar: 0
+    isHorizontal: 0
+    length: 2
+    gridPosition: {x: 2, y: 3}
+  - carId: 4
+    isMainCar: 0
+    isHorizontal: 0
+    length: 2
+    gridPosition: {x: 0, y: 0}
+  - carId: 5
+    isMainCar: 0
+    isHorizontal: 0
+    length: 2
+    gridPosition: {x: 1, y: 0}
+  - carId: 6
+    isMainCar: 0
+    isHorizontal: 0
+    length: 2
+    gridPosition: {x: 2, y: 0}
+  - carId: 7
     isMainCar: 0
     isHorizontal: 0
     length: 3
-    gridPosition: {x: 2, y: 0}
-  - carId: 3
+    gridPosition: {x: 4, y: 2}
+  - carId: 8
+    isMainCar: 0
+    isHorizontal: 0
+    length: 2
+    gridPosition: {x: 5, y: 2}
+  - carId: 9
     isMainCar: 0
     isHorizontal: 1
     length: 2
-    gridPosition: {x: 0, y: 4}
+    gridPosition: {x: 4, y: 1}
+  - carId: 10
+    isMainCar: 0
+    isHorizontal: 1
+    length: 2
+    gridPosition: {x: 4, y: 0}
   boardWidth: 6
   boardHeight: 6
   tileSpacing: 6
