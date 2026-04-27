@@ -445,6 +445,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   boardTilePrefab: {fileID: 8851917254948447292, guid: 24bd1ac55d96c48dd9cc74cd3d303ab1, type: 3}
   carPrefab: {fileID: 7954358756618154438, guid: 3ed4a57d622e148588adc7c377700977, type: 3}
+  cars:
+  - carId: 1
+    isMainCar: 1
+    isHorizontal: 1
+    length: 2
+    gridPosition: {x: 4, y: 4}
+  - carId: 2
+    isMainCar: 0
+    isHorizontal: 0
+    length: 3
+    gridPosition: {x: 2, y: 0}
+  - carId: 3
+    isMainCar: 0
+    isHorizontal: 1
+    length: 2
+    gridPosition: {x: 0, y: 4}
   boardWidth: 6
   boardHeight: 6
   tileSpacing: 6
