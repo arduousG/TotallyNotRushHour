@@ -4,6 +4,8 @@ public class PuzzleController : MonoBehaviour
 {
     public GameObject boardTilePrefab;
     public GameObject carPrefab;
+    public GameObject exitPrefab;
+    public GameObject winText;
 
     public CarSpawnData[] cars;
 
@@ -11,6 +13,9 @@ public class PuzzleController : MonoBehaviour
     public int boardHeight = 6;
 
     public float tileSpacing = 5f;
+
+    private bool gameWon = false;
+    public bool IsGameWon => gameWon;
 
     private CarController[,] grid;
 
@@ -31,6 +36,7 @@ public class PuzzleController : MonoBehaviour
         GenerateBoard();
         grid = new CarController[boardWidth, boardHeight];
         SpawnCars();
+        SpawnExit();
     }
 
     // Generating a 6x6 board
@@ -106,6 +112,7 @@ public class PuzzleController : MonoBehaviour
                 controller.isHorizontal = car.isHorizontal;
                 controller.length = car.length;
                 controller.tileSpacing = tileSpacing;
+                controller.isMainCar = car.isMainCar;
             }
 
             grid[car.gridPosition.x, car.gridPosition.y] = controller;
@@ -135,7 +142,11 @@ public class PuzzleController : MonoBehaviour
         foreach (var cell in cells)
         {
             if (!IsInsideBoard(cell))
-                return false;
+            {
+                if (!IsExitCell(cell, car))
+                    return false;
+                    continue;
+            }
 
             CarController occupyingCar = grid[cell.x, cell.y];
             if (occupyingCar != null && occupyingCar != car)
@@ -149,12 +160,65 @@ public class PuzzleController : MonoBehaviour
     {
         foreach (var cell in car.GetOccupiedCells(oldOrigin))
         {
-            grid[cell.x, cell.y] = null;
+            if (IsInsideBoard(cell))
+            {
+                grid[cell.x, cell.y] = null;
+            }
         }
 
         foreach (var cell in car.GetOccupiedCells(newOrigin))
         {
-            grid[cell.x, cell.y] = car;
+            if (IsInsideBoard(cell))
+            {
+                grid[cell.x, cell.y] = car;
+            }
         }
+    }
+
+    void SpawnExit()
+    {
+        Vector3 position = new Vector3(
+            boardWidth * tileSpacing + tileSpacing / 2f,
+            0.1f,
+            3 * tileSpacing + tileSpacing / 2f
+        );
+
+        Instantiate(exitPrefab, position, Quaternion.identity);
+    }
+
+    public bool IsExitCell(Vector2Int cell, CarController car)
+    {
+        return car.isHorizontal &&
+            car.isMainCar &&
+            cell.x == boardWidth;
+    }
+
+    public void CheckWin(CarController car)
+    {
+        if (!car.isMainCar)
+            return;
+
+        
+        foreach (var cell in car.GetOccupiedCells(car.gridPosition))
+        {
+            if (IsExitCell(cell, car))
+            {
+                Win();
+                return;
+            }
+        }
+    }
+
+    void Win()
+    {
+        if (gameWon)
+            return;
+
+        gameWon = true;
+
+        Debug.Log("PUZZLE COMPLETE!");
+
+        if (winText != null)
+            winText.SetActive(true);
     }
 }

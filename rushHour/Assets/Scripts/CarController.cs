@@ -6,6 +6,7 @@ public class CarController : MonoBehaviour
     public Vector2Int gridPosition;
     public bool isHorizontal;
     public int length;
+    public bool isMainCar;
     public float tileSpacing = 5f;
     public PuzzleController puzzle;
     public List<Vector2Int> occupiedCells = new List<Vector2Int>();
@@ -30,10 +31,8 @@ public class CarController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Debug.Log("Mouse Clicked");
-        }
+        if (puzzle != null && puzzle.IsGameWon)
+            return;
 
         if (!selected)
             return;
@@ -81,6 +80,7 @@ public class CarController : MonoBehaviour
 
         gridPosition = newOrigin;
         transform.position = GridToWorld(gridPosition);
+        puzzle.CheckWin(this);
     }
 
     void OnMouseDown()
