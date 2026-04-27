@@ -40,6 +40,12 @@ public class PuzzleController : MonoBehaviour
         grid = new CarController[boardWidth, boardHeight];
         SpawnCars();
         SpawnExit();
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayMusicLoop();
+        }
     }
 
     void Update()
@@ -126,9 +132,15 @@ public class PuzzleController : MonoBehaviour
                 controller.isMainCar = car.isMainCar;
 
                 startingPositions[controller] = car.gridPosition;
-            }
 
-            grid[car.gridPosition.x, car.gridPosition.y] = controller;
+                foreach (var cell in controller.GetOccupiedCells(car.gridPosition))
+                {
+                    if (IsInsideBoard(cell))
+                    {
+                        grid[cell.x, cell.y] = controller;
+                    }
+                }
+            }
         }
     }
 
@@ -231,6 +243,12 @@ public class PuzzleController : MonoBehaviour
 
         Debug.Log("PUZZLE COMPLETE!");
 
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayWin();
+        }
+
         if (winText != null)
             winText.SetActive(true);
     }
@@ -238,6 +256,13 @@ public class PuzzleController : MonoBehaviour
     public void ResetPuzzle()
     {
         gameWon = false;
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayReset();
+            audioManager.PlayMusicLoop();
+        }
 
         if (winText != null)
             winText.SetActive(false);

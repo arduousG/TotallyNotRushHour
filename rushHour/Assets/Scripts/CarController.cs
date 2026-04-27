@@ -12,6 +12,8 @@ public class CarController : MonoBehaviour
     public List<Vector2Int> occupiedCells = new List<Vector2Int>();
 
     private bool selected = false;
+    private float lastInvalidMoveSfxTime = -999f;
+    private const float InvalidMoveSfxCooldown = 0.12f;
 
     private static CarController currentlySelected;
 
@@ -74,13 +76,36 @@ public class CarController : MonoBehaviour
         Vector2Int newOrigin = gridPosition + direction;
 
         if (!puzzle.CanPlaceCar(this, newOrigin))
+        {
+            if (Time.time - lastInvalidMoveSfxTime >= InvalidMoveSfxCooldown)
+            {
+                AudioManager invalidMoveAudioManager = AudioManager.Instance;
+                if (invalidMoveAudioManager != null)
+                {
+                    invalidMoveAudioManager.PlayInvalidMove();
+                }
+                lastInvalidMoveSfxTime = Time.time;
+            }
             return;
+        }
 
         puzzle.SetCarPosition(this, gridPosition, newOrigin);
 
         gridPosition = newOrigin;
         transform.position = GridToWorld(gridPosition);
+
+        // Check first so win sound is not competing with successful move SFX
         puzzle.CheckWin(this);
+        if (puzzle.IsGameWon)
+        {
+            return;
+        }
+
+        AudioManager moveSuccessAudioManager = AudioManager.Instance;
+        if (moveSuccessAudioManager != null)
+        {
+            moveSuccessAudioManager.PlayMoveSuccess();
+        }
     }
 
     void OnMouseDown()
@@ -92,6 +117,12 @@ public class CarController : MonoBehaviour
 
         selected = true;
         currentlySelected = this;
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayCarSelect();
+        }
 
         Debug.Log("Car Selected");
     }
