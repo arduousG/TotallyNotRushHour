@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2390403976034388708}
   - component: {fileID: 1610496543200187922}
   - component: {fileID: 6720965548723368003}
+  - component: {fileID: -2060084379993748923}
   m_Layer: 0
   m_Name: MainCar
   m_TagString: Untagged
@@ -132,3 +133,19 @@ MonoBehaviour:
   cellSize: 5
   carHeight: 5
   mainCarColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &-2060084379993748923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7954358756618154438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7795f9caaaf90446aaa97fa30d4d8ccb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CarController
+  gridPosition: {x: 0, y: 0}
+  isHorizontal: 0
+  length: 0
+  tileSpacing: 5

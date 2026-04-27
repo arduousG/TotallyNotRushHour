@@ -85,7 +85,6 @@ public class PuzzleController : MonoBehaviour
             );
 
             CarView view = spawnedCar.GetComponent<CarView>();
-
             if (view != null)
             {
                 view.Initialize(
@@ -94,6 +93,15 @@ public class PuzzleController : MonoBehaviour
                     car.length,
                     car.isHorizontal
                 );
+            }
+
+            CarController controller = spawnedCar.GetComponent<CarController>();
+            if (controller != null)
+            {
+                controller.gridPosition = car.gridPosition;
+                controller.isHorizontal = car.isHorizontal;
+                controller.length = car.length;
+                controller.tileSpacing = tileSpacing;
             }
         }
     }
