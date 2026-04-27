@@ -1,16 +1,32 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class CarController : MonoBehaviour
 {
     public Vector2Int gridPosition;
     public bool isHorizontal;
     public int length;
-
     public float tileSpacing = 5f;
+    public PuzzleController puzzle;
+    public List<Vector2Int> occupiedCells = new List<Vector2Int>();
 
     private bool selected = false;
 
     private static CarController currentlySelected;
+
+    public List<Vector2Int> GetOccupiedCells(Vector2Int origin)
+    {
+        List<Vector2Int> cells = new List<Vector2Int>();
+
+        for (int i = 0; i < length; i++)
+        {
+            if (isHorizontal)
+                cells.Add(new Vector2Int(origin.x + i, origin.y));
+            else
+                cells.Add(new Vector2Int(origin.x, origin.y + i));
+        }
+        return cells;
+    }
 
     void Update()
     {
@@ -56,11 +72,15 @@ public class CarController : MonoBehaviour
 
     void Move(Vector2Int direction)
     {
-        gridPosition += direction;
+        Vector2Int newOrigin = gridPosition + direction;
 
-        Vector3 worldPosition = GridToWorld(gridPosition);
+        if (!puzzle.CanPlaceCar(this, newOrigin))
+            return;
 
-        transform.position = worldPosition;
+        puzzle.SetCarPosition(this, gridPosition, newOrigin);
+
+        gridPosition = newOrigin;
+        transform.position = GridToWorld(gridPosition);
     }
 
     void OnMouseDown()

@@ -12,6 +12,8 @@ public class PuzzleController : MonoBehaviour
 
     public float tileSpacing = 5f;
 
+    private CarController[,] grid;
+
     // Puzzle Definition
     [System.Serializable]
     public class CarSpawnData
@@ -27,6 +29,7 @@ public class PuzzleController : MonoBehaviour
     void Start()
     {
         GenerateBoard();
+        grid = new CarController[boardWidth, boardHeight];
         SpawnCars();
     }
 
@@ -98,11 +101,60 @@ public class PuzzleController : MonoBehaviour
             CarController controller = spawnedCar.GetComponent<CarController>();
             if (controller != null)
             {
+                controller.puzzle = this;
                 controller.gridPosition = car.gridPosition;
                 controller.isHorizontal = car.isHorizontal;
                 controller.length = car.length;
                 controller.tileSpacing = tileSpacing;
             }
+
+            grid[car.gridPosition.x, car.gridPosition.y] = controller;
+        }
+    }
+
+    public bool IsInsideBoard(Vector2Int pos)
+    {
+        return pos.x >= 0 && pos.x < boardWidth && pos.y >= 0 && pos.y < boardHeight;
+    }
+
+    public bool IsOccupied(Vector2Int pos)
+    {
+        return grid[pos.x, pos.y] != null;
+    }
+
+    public void UpdateGrid(Vector2Int oldPos, Vector2Int newPos, CarController car)
+    {
+        grid[oldPos.x, oldPos.y] = null;
+        grid[newPos.x, newPos.y] = car;
+    }
+
+    public bool  CanPlaceCar(CarController car, Vector2Int newOrigin)
+    {
+        var cells = car.GetOccupiedCells(newOrigin);
+
+        foreach (var cell in cells)
+        {
+            if (!IsInsideBoard(cell))
+                return false;
+
+            CarController occupyingCar = grid[cell.x, cell.y];
+            if (occupyingCar != null && occupyingCar != car)
+                return false;
+        }
+
+        return true;
+    }
+
+    public void SetCarPosition(CarController car, Vector2Int oldOrigin, Vector2Int newOrigin)
+    {
+        foreach (var cell in car.GetOccupiedCells(oldOrigin))
+        {
+            grid[cell.x, cell.y] = null;
+        }
+
+        foreach (var cell in car.GetOccupiedCells(newOrigin))
+        {
+            grid[cell.x, cell.y] = car;
         }
     }
 }
