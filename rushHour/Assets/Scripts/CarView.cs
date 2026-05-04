@@ -22,6 +22,13 @@ public class CarView : MonoBehaviour
 
     private Renderer carRenderer;
     private MaterialPropertyBlock propertyBlock;
+    private Color currentColor = Color.white;
+
+    // puzzle stores this -- overlay can mirror the live spawned colors!
+    public Color CurrentColor
+    {
+        get { return currentColor; }
+    }
 
     private static readonly Color[] randomColors =
     {
@@ -67,7 +74,10 @@ public class CarView : MonoBehaviour
 
     private void ApplyColor()
     {
+        // keep main car red, rand others (we should add non-duplicates + get rid of same gray as background/grid)
         Color chosenColor = isMainCar ? mainCarColor : GetRandomNonRedColor();
+        //remember final picked color for runtime metadata
+        currentColor = chosenColor;
         SetColor(chosenColor);
     }
 

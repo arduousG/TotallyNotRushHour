@@ -16,6 +16,10 @@ public class CarController : MonoBehaviour
     private const float InvalidMoveSfxCooldown = 0.12f;
 
     private static CarController currentlySelected;
+    public static void ClearSel() // helper to clear stale static ref on reload without needing to click a car
+    {
+        currentlySelected = null;
+    }
 
     public List<Vector2Int> GetOccupiedCells(Vector2Int origin)
     {
@@ -125,6 +129,15 @@ public class CarController : MonoBehaviour
         }
 
         Debug.Log("Car Selected");
+    }
+
+    private void OnDestroy()
+    {
+        //prevents stale static ref when car is removed on reload
+        if (currentlySelected == this)
+        {
+            currentlySelected = null;
+        }
     }
 
     Vector3 GridToWorld(Vector2Int gridPosition)
