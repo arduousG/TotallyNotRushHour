@@ -101,3 +101,5 @@ InitTestScene*.unity*
 /Assets/
 /Packages/
 /ProjectSettings/
+
+.DS_Store
