@@ -31,6 +31,12 @@ public class PuzzleController : MonoBehaviour
     public Diff activeDiff = Diff.Beginner;
     public int activeLvlIdx = 0;
 
+    [Header("Valid Move Highlight")]
+    //toggle legal move tile tinting/highlighting
+    public bool showValidMoveHighlight = true;
+    //tint/highlight applied to board tiles that belong to  >=one legal dest footprint
+    public Color highlightColor = new Color(0.2f, 0.85f, 1f, 0.5f);
+
     private bool gameWon = false;
     public bool IsGameWon => gameWon;
 
@@ -45,6 +51,15 @@ public class PuzzleController : MonoBehaviour
     private string currentBoardString = "";
     private string currentLevelId = "";
     private int currentSourceScore = -1;
+    //board tile renderers indexed by board coordinates for direct tinting of grid for highlights
+    private Renderer[,] boardTileRenderers;
+    //tracks currently tinted tiles for qucik reset
+    private readonly List<Vector2Int> highlightedCells = new List<Vector2Int>();
+    //shared property block to avoid creating runtime material instances per cell
+    private MaterialPropertyBlock tilePropertyBlock;
+    //cache of last rendered selection state -> skip redundant highlight rebuild
+    private CarController lastHighlightCar;
+    private Vector2Int lastHighlightOrigin;
 
     public string CurrentBoardString
     {
@@ -83,6 +98,12 @@ public class PuzzleController : MonoBehaviour
         public int length = 2;
 
         public Vector2Int gridPosition;
+    }
+
+    //init reusable property block @ runtime for tile highlight updates
+    void Awake()
+    {
+        tilePropertyBlock = new MaterialPropertyBlock();
     }
 
     void Start()
@@ -124,6 +145,7 @@ public class PuzzleController : MonoBehaviour
         {
             SetDiff(Diff.Expert);
         }
+        UpdateMoveHighlight();
     }
 
     void InitLvlDb()
@@ -201,9 +223,10 @@ public class PuzzleController : MonoBehaviour
             winText.SetActive(false);
         }
 
-        //new level: clear old spawned cars + selected state first
+        //new level, clean runtime state before rebuild: clear old spawned cars + selected state first
         ClearLiveCars();
         CarController.ClearSel();
+        ClearMoveHighlights();
 
         if (useDynLvls)
         {
@@ -229,11 +252,12 @@ public class PuzzleController : MonoBehaviour
             return;
         }
 
-        //reset runtime maps per active level instance
+        // reset/rebuild runtime maps per active level instance ->  occupancy/color data match freshly spawned cars
         grid = new CarController[boardWidth, boardHeight];
         carColorById = new Dictionary<int, Color32>();
         startingPositions = new Dictionary<CarController, Vector2Int>();
         SpawnCars();
+        UpdateMoveHighlight();
     }
 
     bool IsValidLvl(CarSpawnData[] inCars)
@@ -244,6 +268,7 @@ public class PuzzleController : MonoBehaviour
         }
 
         bool foundMain = false;
+        //occupied cell tracking whilst validating to reject overlaps + detect out of bounds cars
         HashSet<Vector2Int> used = new HashSet<Vector2Int>();
 
         for (int i = 0; i < inCars.Length; i++)
@@ -396,6 +421,7 @@ public class PuzzleController : MonoBehaviour
             return null;
         }
 
+        //group board cells by piece letter --> each car can be reconstructed
         Dictionary<char, List<Vector2Int>> map = new Dictionary<char, List<Vector2Int>>();
 
         for (int i = 0; i < board.Length; i++)
@@ -465,6 +491,8 @@ public class PuzzleController : MonoBehaviour
     // Generating a 6x6 board
     void GenerateBoard()
     {
+        boardTileRenderers = new Renderer[boardWidth, boardHeight];
+
         for (int x = 0; x < boardWidth; x++)
         {
             for (int y = 0; y < boardHeight; y++)
@@ -475,7 +503,10 @@ public class PuzzleController : MonoBehaviour
                     y * tileSpacing + tileSpacing / 2f
                 );
 
-                Instantiate(boardTilePrefab, position, Quaternion.identity);
+                GameObject tile = Instantiate(boardTilePrefab, position, Quaternion.identity); // capture instantiate to `tile` to query component for caching
+                //cache renderer by grid coordinate -> highlight updates are O(1) per cell w/o scene queries
+                Renderer tileRenderer = tile.GetComponentInChildren<Renderer>();
+                boardTileRenderers[x, y] = tileRenderer;
             }
         }
     }
@@ -710,5 +741,149 @@ public class PuzzleController : MonoBehaviour
                 }
             }
         }
+        UpdateMoveHighlight(forceRefresh: true);
+    }
+
+    void UpdateMoveHighlight(bool forceRefresh = false)
+    {
+        if (!showValidMoveHighlight || gameWon)
+        {
+            ClearMoveHighlights();
+            lastHighlightCar = null;
+            return;
+        }
+        CarController selected = CarController.CurrentSelected;
+        if (selected == null || selected.puzzle != this)
+        {
+            ClearMoveHighlights();
+            lastHighlightCar = null;
+            return;
+        }
+        //skip when selected car and origin have not changed
+        if (!forceRefresh && selected == lastHighlightCar && selected.gridPosition == lastHighlightOrigin)
+        {
+            return;
+        }
+        //rebuild markers only when selected car or origin have changed
+        ClearMoveHighlights();
+        List<Vector2Int> validOrigins = GetValidOriginsForCar(selected);
+
+        //merge all dest footprints into one unique set of cells to highlight. -> apply in one pass
+        HashSet<Vector2Int> cellsToHighlight = new HashSet<Vector2Int>();
+        for (int i = 0; i < validOrigins.Count; i++)
+        {
+            List<Vector2Int> occupied = selected.GetOccupiedCells(validOrigins[i]);
+            for (int c = 0; c < occupied.Count; c++)
+            {
+                if (IsInsideBoard(occupied[c]))
+                {
+                    cellsToHighlight.Add(occupied[c]);
+                }
+            }
+        }
+        ApplyBoardHighlights(cellsToHighlight);
+        lastHighlightCar = selected;
+        lastHighlightOrigin = selected.gridPosition;
+    }
+
+    List<Vector2Int> GetValidOriginsForCar(CarController car)
+    {
+        List<Vector2Int> origins = new List<Vector2Int>();
+        if (car == null)
+        {
+            return origins;
+        }
+        Vector2Int[] directions;
+        if (car.isHorizontal)
+        {
+            directions = new Vector2Int[] { Vector2Int.left, Vector2Int.right };
+        }
+        else
+        {
+            directions = new Vector2Int[] { Vector2Int.down, Vector2Int.up };
+        }
+        //step by step raycast along allowed axis until blocked to find every valid stop along the lane
+        for (int d = 0; d < directions.Length; d++)
+        {
+            Vector2Int probe = car.gridPosition;
+            while (true)
+            {
+                probe = probe + directions[d];
+                if (!CanPlaceCar(car, probe))
+                {
+                    break;
+                }
+                //every reachable stop along ==> valid highlight target
+                origins.Add(probe);
+            }
+        }
+        return origins;
+    }
+
+    void ApplyBoardHighlights(HashSet<Vector2Int> cells)
+    {
+        if (cells == null || cells.Count == 0)
+        {
+            return;
+        }
+        foreach (Vector2Int cell in cells)
+        {
+            // Tint each target tile and remember it for fast revert.
+            TintBoardCell(cell, highlightColor);
+            highlightedCells.Add(cell);
+        }
+    }
+
+    void TintBoardCell(Vector2Int cell, Color tint)
+    {
+        if (!IsInsideBoard(cell) || boardTileRenderers == null)
+        {
+            return;
+        }
+        Renderer tileRenderer = boardTileRenderers[cell.x, cell.y];
+        if (tileRenderer == null)
+        {
+            return;
+        }
+        tilePropertyBlock.Clear();
+        tileRenderer.GetPropertyBlock(tilePropertyBlock);
+
+        // Support both URP and Built-in color property names.
+        if (tileRenderer.sharedMaterial != null && tileRenderer.sharedMaterial.HasProperty("_BaseColor"))
+        {
+            tilePropertyBlock.SetColor("_BaseColor", tint);
+        }
+        if (tileRenderer.sharedMaterial != null && tileRenderer.sharedMaterial.HasProperty("_Color"))
+        {
+            tilePropertyBlock.SetColor("_Color", tint);
+        }
+        tileRenderer.SetPropertyBlock(tilePropertyBlock);
+    }
+
+    void ClearMoveHighlights()
+    {
+        for (int i = 0; i < highlightedCells.Count; i++)
+        {
+            Vector2Int cell = highlightedCells[i];
+            if (!IsInsideBoard(cell) || boardTileRenderers == null)
+            {
+                continue;
+            }
+
+            Renderer tileRenderer = boardTileRenderers[cell.x, cell.y];
+            if (tileRenderer == null)
+            {
+                continue;
+            }
+            tilePropertyBlock.Clear();
+            // Empty property block restores the renderer's original material color.
+            tileRenderer.SetPropertyBlock(tilePropertyBlock);
+        }
+        highlightedCells.Clear();
+    }
+
+    void OnDisable()
+    {
+        ClearMoveHighlights();
     }
 }

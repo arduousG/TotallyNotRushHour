@@ -16,8 +16,17 @@ public class CarController : MonoBehaviour
     private const float InvalidMoveSfxCooldown = 0.12f;
 
     private static CarController currentlySelected;
+    public static CarController CurrentSelected
+    {
+        get { return currentlySelected; } //ADDed: with / for move highlighting, can be used for other selection based feats.
+    }
+
     public static void ClearSel() // helper to clear stale static ref on reload without needing to click a car
     {
+        if (currentlySelected != null)
+        {
+            currentlySelected.selected = false; //ADDed: w/ move highlighting
+        }
         currentlySelected = null;
     }
 
