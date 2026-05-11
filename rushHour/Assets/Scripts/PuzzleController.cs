@@ -40,6 +40,10 @@ public class PuzzleController : MonoBehaviour
     //tint/highlight applied to board tiles that belong to  >=one legal dest footprint
     public Color highlightColor = new Color(0.2f, 0.85f, 1f, 0.5f);
 
+    [Header("Menu")]
+    public GameObject mainMenuPanel;
+    public GameObject gameplayUi;
+
     private bool gameWon = false;
     public bool IsGameWon => gameWon;
     private int moveCount = 0;
@@ -117,13 +121,23 @@ public class PuzzleController : MonoBehaviour
         SpawnExit();
 
         InitLvlDb();
-        LoadActiveLvl();
+
+        mainMenuPanel.SetActive(true);
+        gameplayUi.SetActive(false);
 
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
         {
             audioManager.PlayMusicLoop();
         }
+    }
+
+    public void StartGame()
+    {
+        mainMenuPanel.SetActive(false);
+        gameplayUi.SetActive(true);
+
+        LoadActiveLvl();
     }
 
     void Update()
@@ -183,20 +197,32 @@ public class PuzzleController : MonoBehaviour
 
     public void SetDiffBeginner()
     {
-        SetDiff(Diff.Beginner);
+        StartGameWithDifficulty(Diff.Beginner);
     }
     public void SetDiffIntermediate()
     {
-        SetDiff(Diff.Intermediate);
+        StartGameWithDifficulty(Diff.Intermediate);
     }
     public void SetDiffAdvanced()
     {
-        SetDiff(Diff.Advanced);
+        StartGameWithDifficulty(Diff.Advanced);
     }
     public void SetDiffExpert()
     {
-        SetDiff(Diff.Expert);
+        StartGameWithDifficulty(Diff.Expert);
     }
+
+    void StartGameWithDifficulty(Diff diff)
+    {
+        activeDiff = diff;
+        activeLvlIdx = 0;
+
+        mainMenuPanel.SetActive(false);
+        gameplayUi.SetActive(true);
+
+        LoadActiveLvl();
+    }
+
     public void SetDiff(Diff diff)
     {
         activeDiff = diff;
@@ -909,5 +935,16 @@ public class PuzzleController : MonoBehaviour
         {
             moveCounterText.text = "Moves: " + moveCount;
         }
+    }
+
+    public void ReturnToMenu()
+    {
+        mainMenuPanel.SetActive(true);
+        gameplayUi.SetActive(false);
+
+        ClearLiveCars();
+        ClearMoveHighlights();
+
+        gameWon = false;
     }
 }
