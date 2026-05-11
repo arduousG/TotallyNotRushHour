@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 public class PuzzleController : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class PuzzleController : MonoBehaviour
     public GameObject carPrefab;
     public GameObject exitPrefab;
     public GameObject winText;
+
+    public TMP_Text moveCounterText;
 
     public CarSpawnData[] cars;
 
@@ -39,6 +42,8 @@ public class PuzzleController : MonoBehaviour
 
     private bool gameWon = false;
     public bool IsGameWon => gameWon;
+    private int moveCount = 0;
+    public int MoveCount => moveCount;
 
     private CarController[,] grid;
     private Dictionary<CarController, Vector2Int> startingPositions = 
@@ -222,6 +227,9 @@ public class PuzzleController : MonoBehaviour
         {
             winText.SetActive(false);
         }
+
+        moveCount = 0;
+        UpdateMoveText();
 
         //new level, clean runtime state before rebuild: clear old spawned cars + selected state first
         ClearLiveCars();
@@ -693,7 +701,7 @@ public class PuzzleController : MonoBehaviour
 
         gameWon = true;
 
-        Debug.Log("PUZZLE COMPLETE!");
+        Debug.Log("PUZZLE COMPLETE IN " + moveCount + " MOVES!");
 
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
@@ -708,6 +716,8 @@ public class PuzzleController : MonoBehaviour
     public void ResetPuzzle()
     {
         gameWon = false;
+        moveCount = 0;
+        UpdateMoveText();
 
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
@@ -885,5 +895,19 @@ public class PuzzleController : MonoBehaviour
     void OnDisable()
     {
         ClearMoveHighlights();
+    }
+
+    public void RegisterMove()
+    {
+        moveCount++;
+        UpdateMoveText();
+    }
+
+    void UpdateMoveText()
+    {
+        if (moveCounterText != null)
+        {
+            moveCounterText.text = "Moves: " + moveCount;
+        }
     }
 }

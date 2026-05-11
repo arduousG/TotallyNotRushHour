@@ -105,6 +105,7 @@ public class CarController : MonoBehaviour
         puzzle.SetCarPosition(this, gridPosition, newOrigin);
 
         gridPosition = newOrigin;
+        puzzle.RegisterMove();
         transform.position = GridToWorld(gridPosition);
 
         // Check first so win sound is not competing with successful move SFX
