@@ -11,6 +11,9 @@ public class CarController : MonoBehaviour
     public PuzzleController puzzle;
     public List<Vector2Int> occupiedCells = new List<Vector2Int>();
 
+    private Vector3 dragStartMousePos;
+    private bool dragging = false;
+
     private bool selected = false;
     private float lastInvalidMoveSfxTime = -999f;
     private const float InvalidMoveSfxCooldown = 0.12f;
@@ -150,6 +153,8 @@ public class CarController : MonoBehaviour
             audioManager.PlayCarSelect();
         }
 
+        dragStartMousePos = Input.mousePosition;
+
         Debug.Log("Car Selected");
     }
 
@@ -181,5 +186,37 @@ public class CarController : MonoBehaviour
             0,
             gridPosition.y * tileSpacing + zOffset
         );
+    }
+
+    void OnMouseDrag()
+    {
+        Vector3 mouseDelta = Input.mousePosition - dragStartMousePos;
+
+        if (isHorizontal)
+        {
+            if (mouseDelta.x > 50f)
+            {
+                Move(Vector2Int.right);
+                dragStartMousePos = Input.mousePosition;
+            }
+            else if (mouseDelta.x < -50f)
+            {
+                Move(Vector2Int.left);
+                dragStartMousePos = Input.mousePosition;
+            }
+        }
+        else
+        {
+            if (mouseDelta.y > 50f)
+            {
+                Move(Vector2Int.up);
+                dragStartMousePos = Input.mousePosition;
+            }
+            else if (mouseDelta.y < -50f)
+            {
+                Move(Vector2Int.down);
+                dragStartMousePos = Input.mousePosition;
+            }
+        }
     }
 }
