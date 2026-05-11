@@ -20,9 +20,15 @@ public class CarView : MonoBehaviour
     [Header("Colors")]
     public Color mainCarColor = Color.red;
 
+    [Header("Selection")]
+    public Color selectedTint = Color.white;
+    [Range(1f, 2f)]
+    public float selectedBrightness = 1.35f;
+
     private Renderer carRenderer;
     private MaterialPropertyBlock propertyBlock;
     private Color currentColor = Color.white;
+    private bool isSelected = false;
 
     // puzzle stores this -- overlay can mirror the live spawned colors!
     public Color CurrentColor
@@ -78,7 +84,7 @@ public class CarView : MonoBehaviour
         Color chosenColor = isMainCar ? mainCarColor : GetRandomNonRedColor();
         //remember final picked color for runtime metadata
         currentColor = chosenColor;
-        SetColor(chosenColor);
+        RefreshVisual();
     }
 
     private Color GetRandomNonRedColor()
@@ -102,5 +108,23 @@ public class CarView : MonoBehaviour
         propertyBlock.SetColor("_BaseColor", color);
 
         carRenderer.SetPropertyBlock(propertyBlock);
+    }
+
+    public void SetSelected(bool selected)
+    {
+        isSelected = selected;
+        RefreshVisual();
+    }
+
+    private void RefreshVisual()
+    {
+        Color displayColor = currentColor;
+
+        if (isSelected)
+        {
+            displayColor *= selectedBrightness;
+        }
+
+        SetColor(displayColor);
     }
 }

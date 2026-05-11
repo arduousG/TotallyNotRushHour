@@ -126,10 +126,22 @@ public class CarController : MonoBehaviour
         if (currentlySelected != null)
         {
             currentlySelected.selected = false;
+
+            CarView oldView = currentlySelected.GetComponent<CarView>();
+            if (oldView != null)
+            {
+                oldView.SetSelected(false);
+            }
         }
 
         selected = true;
         currentlySelected = this;
+
+        CarView newView = GetComponent<CarView>();
+        if (newView != null)
+        {
+            newView.SetSelected(true);
+        }
 
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
