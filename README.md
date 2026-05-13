@@ -5,7 +5,8 @@ A 6x6 grid-based sliding puzzle game inspired by Rush Hour, where players free a
 Guide the red target car to the exit by sliding other vehicles out of the way
 
 ## Current Basic Functionality
-- Procedural board generation for a 6x6 puzzle grid (not yet for puzzle layout -- current manual spawn for POC build)
+- Difficulty level select 
+- Procedural board generation for a 6x6 puzzle grid 
 - Car spawning from puzzle data
 - Car selection by mouse click
 - Movement constrained by orientation:
@@ -14,17 +15,23 @@ Guide the red target car to the exit by sliding other vehicles out of the way
 - Collision and boundary checks block invalid moves
 - Exit detection and win condition for the target car
 - Puzzle reset that restores all cars back to initial positions
+- Solution card *overlay*
 - Audio system:
 	- Background music loop
-	- Car select, valid move, invalid move, reset, and win SFX
+	- Car select, valid move, invalid move/collision, reset, and win SFX
 	- UI button click SFX
 
 ## Controls
 - Left Mouse Click: Select a car
+	- Hold click and drag movement also available
 - Arrow Keys: Move selected car (if move is valid)
 - R: Reset puzzle
 - Reset UI Button: Reset puzzle via UI
+- Tab: Toggle Solution Card Overlay
+- 1,2,3,4: Level select -- *debug keys*
 
-## Current: POC Build
-- Tagged as `poc`
+## Current: Alpha Build
+- Tagged as `alpha`
 - Commit includes Unity WebGL build output and required assets/settings
+
+- ADDED: Select + valid move highlighting, menu + level select options, as well as solution card overlay (*currently broken in WebGL build however*)
