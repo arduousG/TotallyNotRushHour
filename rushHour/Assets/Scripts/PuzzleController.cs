@@ -70,6 +70,10 @@ public class PuzzleController : MonoBehaviour
     private CarController lastHighlightCar;
     private Vector2Int lastHighlightOrigin;
 
+    private bool boardGenerated = false;
+    private GameObject exitObject;
+    private GameObject[,] boardTiles;
+
     public string CurrentBoardString
     {
         get { return currentBoardString; }
@@ -117,9 +121,6 @@ public class PuzzleController : MonoBehaviour
 
     void Start()
     {
-        GenerateBoard();
-        SpawnExit();
-
         InitLvlDb();
 
         mainMenuPanel.SetActive(true);
@@ -137,6 +138,27 @@ public class PuzzleController : MonoBehaviour
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
 
+        if (!boardGenerated)
+        {
+            GenerateBoard();
+            SpawnExit();
+            boardGenerated = true;
+        }
+        else
+        {
+            foreach(GameObject tile in boardTiles)
+            {
+                if(tile != null)
+                {
+                    tile.SetActive(true);
+                }
+            }
+
+            if(exitObject != null)
+            {
+                exitObject.SetActive(true);
+            }
+        }
         LoadActiveLvl();
     }
 
@@ -217,8 +239,32 @@ public class PuzzleController : MonoBehaviour
         activeDiff = diff;
         activeLvlIdx = 0;
 
+        // Hide menu and show game UI
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
+
+        // Create board first time, otherwise reactivate it
+        if (!boardGenerated)
+        {
+            GenerateBoard();
+            SpawnExit();
+            boardGenerated = true;
+        }
+        else
+        {
+            foreach (GameObject tile in boardTiles)
+            {
+                if (tile != null)
+                {
+                    tile.SetActive(true);
+                }
+            }
+
+            if (exitObject != null)
+            {
+                exitObject.SetActive(true);
+            }
+        }
 
         LoadActiveLvl();
     }
@@ -526,6 +572,7 @@ public class PuzzleController : MonoBehaviour
     void GenerateBoard()
     {
         boardTileRenderers = new Renderer[boardWidth, boardHeight];
+        boardTiles = new GameObject[boardWidth, boardHeight];
 
         for (int x = 0; x < boardWidth; x++)
         {
@@ -537,10 +584,18 @@ public class PuzzleController : MonoBehaviour
                     y * tileSpacing + tileSpacing / 2f
                 );
 
-                GameObject tile = Instantiate(boardTilePrefab, position, Quaternion.identity); // capture instantiate to `tile` to query component for caching
-                //cache renderer by grid coordinate -> highlight updates are O(1) per cell w/o scene queries
-                Renderer tileRenderer = tile.GetComponentInChildren<Renderer>();
-                boardTileRenderers[x, y] = tileRenderer;
+                GameObject tile = Instantiate(
+                    boardTilePrefab,
+                    position,
+                    Quaternion.identity
+                );
+
+                boardTiles[x,y] = tile;
+
+                Renderer tileRenderer =
+                    tile.GetComponentInChildren<Renderer>();
+
+                boardTileRenderers[x,y] = tileRenderer;
             }
         }
     }
@@ -691,7 +746,11 @@ public class PuzzleController : MonoBehaviour
             clampedExitRow * tileSpacing + tileSpacing / 2f
         );
 
-        Instantiate(exitPrefab, position, Quaternion.identity);
+        exitObject = Instantiate(
+            exitPrefab,
+            position,
+            Quaternion.identity
+        );
     }
 
     public bool IsExitCell(Vector2Int cell, CarController car)
@@ -946,5 +1005,21 @@ public class PuzzleController : MonoBehaviour
         ClearMoveHighlights();
 
         gameWon = false;
+
+        if(boardTiles != null)
+        {
+            foreach(GameObject tile in boardTiles)
+            {
+                if(tile != null)
+                {
+                    tile.SetActive(false);
+                }
+            }
+        }
+
+        if(exitObject != null)
+        {
+            exitObject.SetActive(false);
+        }
     }
 }
