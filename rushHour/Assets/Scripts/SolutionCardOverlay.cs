@@ -19,6 +19,7 @@ public class SolutionCardOverlay : MonoBehaviour
     [Header("Data Source")]
     public string solutionFileName = "solution_alpha_sheet.txt";
     public TextAsset solutionSheetAsset;
+    public TextAsset solvedLevelsJsonAsset;
 
     [Header("Visual")]
     public Vector2 cardSize = new Vector2(760f, 840f);
@@ -53,6 +54,24 @@ public class SolutionCardOverlay : MonoBehaviour
         public int moves;
         public int steps;
         public List<string> solutionMoves = new List<string>();
+    }
+
+    [Serializable]
+    private class SolvedLevelRecord
+    {
+        public string section;
+        public string tier;
+        public int level_num;
+        public string id;
+        public string board;
+        public int move_count;
+        public string[] solution;
+    }
+
+    [Serializable]
+    private class SolvedLevelRecordList
+    {
+        public SolvedLevelRecord[] items;
     }
 
     void Start()
@@ -117,6 +136,13 @@ public class SolutionCardOverlay : MonoBehaviour
         byBoard.Clear();
         byId.Clear();
 
+        string jsonSource;
+        if (TryLoadSolvedJson(out jsonSource))
+        {
+            Debug.Log("Solution sheet loaded from " + jsonSource + ". Entries by board: " + byBoard.Count + ", by id: " + byId.Count);
+            return;
+        }
+
         string[] lines;
         string source;
         if (!TryLoadSolutionLines(out lines, out source))
@@ -128,6 +154,127 @@ public class SolutionCardOverlay : MonoBehaviour
         ParseLines(lines);
 
         Debug.Log("Solution sheet loaded from " + source + ". Entries by board: " + byBoard.Count + ", by id: " + byId.Count);
+    }
+
+    bool TryLoadSolvedJson(out string source)
+    {
+        source = "";
+
+        TextAsset jsonAsset = solvedLevelsJsonAsset;
+        if (jsonAsset == null)
+        {
+            jsonAsset = Resources.Load<TextAsset>("all_levels_solved");
+        }
+
+        if (jsonAsset == null || string.IsNullOrEmpty(jsonAsset.text))
+        {
+            return false;
+        }
+
+        string json = jsonAsset.text.Trim();
+        if (string.IsNullOrEmpty(json))
+        {
+            return false;
+        }
+
+        // JsonUtility cannot deserialize a raw array, so we wrap it.
+        string wrapped = "{\"items\":" + json + "}";
+        SolvedLevelRecordList parsed = JsonUtility.FromJson<SolvedLevelRecordList>(wrapped);
+        if (parsed == null || parsed.items == null || parsed.items.Length == 0)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < parsed.items.Length; i++)
+        {
+            SolvedLevelRecord row = parsed.items[i];
+            if (row == null || string.IsNullOrEmpty(row.id) || string.IsNullOrEmpty(row.board))
+            {
+                continue;
+            }
+
+            SolEntry entry = new SolEntry();
+            entry.id = row.id.Trim();
+            entry.board = row.board.Trim();
+            entry.moves = row.move_count;
+            entry.tier = string.IsNullOrEmpty(row.tier) ? "Unknown" : row.tier.Trim();
+            entry.label = BuildEntryLabel(row);
+
+            if (row.solution != null)
+            {
+                for (int t = 0; t < row.solution.Length; t++)
+                {
+                    string token = StripControlChars((row.solution[t] ?? "").Trim());
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        entry.solutionMoves.Add(token);
+                    }
+                }
+            }
+
+            entry.steps = SumMoveSteps(entry.solutionMoves);
+            FinalizeCurrent(entry);
+        }
+
+        if (byBoard.Count == 0 && byId.Count == 0)
+        {
+            return false;
+        }
+
+        source = "Resources/all_levels_solved";
+        return true;
+    }
+
+    string BuildEntryLabel(SolvedLevelRecord row)
+    {
+        if (row == null)
+        {
+            return "Level";
+        }
+
+        string tier = string.IsNullOrEmpty(row.tier) ? "Tier" : row.tier.Trim();
+        if (row.level_num > 0)
+        {
+            return tier + " L" + row.level_num.ToString("D2");
+        }
+
+        return tier;
+    }
+
+    int SumMoveSteps(List<string> tokens)
+    {
+        if (tokens == null || tokens.Count == 0)
+        {
+            return 0;
+        }
+
+        int total = 0;
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            string token = tokens[i];
+            if (string.IsNullOrEmpty(token))
+            {
+                continue;
+            }
+
+            int end = token.Length - 1;
+            while (end >= 0 && char.IsDigit(token[end]))
+            {
+                end--;
+            }
+
+            if (end < token.Length - 1)
+            {
+                string digits = token.Substring(end + 1);
+                int steps;
+                if (int.TryParse(digits, out steps))
+                {
+                    total += steps;
+                }
+            }
+        }
+
+        return total;
     }
 
     bool TryLoadSolutionLines(out string[] lines, out string source)

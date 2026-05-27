@@ -1,9 +1,12 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
 
 public class PuzzleController : MonoBehaviour
 {
+    public event Action<Diff, int, bool> LevelCompletionChanged;
+
     public enum Diff
     {
         Beginner,
@@ -85,6 +88,7 @@ public class PuzzleController : MonoBehaviour
     private readonly List<Vector2Int> highlightOccupiedCellBuffer = new List<Vector2Int>(3);
     private GameObject exitObject;
     private GameObject[,] boardTiles;
+    private const string CompletionPrefKeyPrefix = "rushhour.level.completed";
 
     public string CurrentBoardString
     {
@@ -213,51 +217,98 @@ public class PuzzleController : MonoBehaviour
     {
         lvlDb = new Dictionary<Diff, List<string>>();
 
-        // Curated set: one row per difficulty, format is "score board id"
-        // src file: rush1000.txt from https://www.michaelfogleman.com/static/rush/rush1000.txt
-        // hardcoded for alpha, will add UI for dynamic loading later if time allows
+        // beta set: 5 levels per difficulty, format "score board id"
         lvlDb[Diff.Beginner] = new List<string>
         {
-            "38 BBKCCoJoKoMxJoAAMoEEoLxNGGoLoNHHIIIo 6061"
+            "39 JBBxDDJoLEENAALooNKFFMooKooMGGHHHxoo 1016",
+            "42 BBCCoxKooMEEKAAMoNKFFGGNooLoHHIILJJJ 1365",
+            "44 ooIBBMCCIJoMHAAJLoHoDDLxFFFKLoGGGKoo 2137",
+            "42 ooIBBMCCIJLMHAAJLoHoDDxoFFFKooGGoKoo 6190",
+            "40 ooJBBMCCJKoMIAAKooIDDLEEFFFLoooxHHHo 730"
         };
 
         lvlDb[Diff.Intermediate] = new List<string>
         {
-            "41 xCCJoooooJLMAAoKLMHDDKoNHoIEENFFIGGG 3519"
+            "50 ooooxoCCCJLoAAIJLMooIDDMHEEKooHFFKox 3874",
+            "40 ooIBBxooIJLoAAIJLoDDoKEEHFFKoMHGGGoM 2273",
+            "38 BBBKxoooJKDDAAJKoMIEEFFMIoGGLoHHooLo 9542",
+            "43 GBBJKoGoHJKxAAHJoLDDEEoLooIoooooIFFF 860",
+            "39 oooxLoHCCKLoHAAKLoDDJooooIJEEooIFFGG 8016"
         };
 
         lvlDb[Diff.Advanced] = new List<string>
         {
-            "38 FBBBoKFoGHoKAAGHJKCCCIJooooIDDooxooo 2588"
+            "41 BBCCCoIooKDDIAAKoLooJEELFFJooMGGJHHM 2882",
+            "41 BBHCCoGoHoJoGAAoJoGDDDJooooIooEEoIFF 594",
+            "38 oBBBCCoDDxoMAAJooMIoJFFNIGGKLNHHHKLN 1544",
+            "42 BBICCoHoIoKoHAAoKoHDDDKooooJEEFFoJGG 1090",
+            "38 xoCCCMDDJoLMAAJoLNoIEELNHIoKFFHGGKoo 24250"
         };
 
         lvlDb[Diff.Expert] = new List<string>
         {
-            "43 HoBBBMHCCJLMAAIJLoDDIKLooooKEEoFFGGo 16930"
+            "40 FoooooFBBBJoAAGHJoCCGHJooooIDDoEEIoo 1680",
+            "39 oooKBBHIoKLMHIAALMHCCDDMooJEEoFFJGGo 7598",
+            "39 BBBJoooooJLMAAoKLMHCCKxNHoIEENFFIoxo 6377",
+            "38 oooIBBooHICCAAHJKMDDoJKMGEEELNGFFFLN 4687",
+            "39 oBBBKMCCoIKMAAoILoGDDJLoGoHJEEFFHooo 28276"
         };
     }
 
     public void SetDiffBeginner()
     {
-        StartGameWithDifficulty(Diff.Beginner);
+        if (!isGameplayActive)
+        {
+            return;
+        }
+
+        SetDiff(Diff.Beginner);
     }
     public void SetDiffIntermediate()
     {
-        StartGameWithDifficulty(Diff.Intermediate);
+        if (!isGameplayActive)
+        {
+            return;
+        }
+
+        SetDiff(Diff.Intermediate);
     }
     public void SetDiffAdvanced()
     {
-        StartGameWithDifficulty(Diff.Advanced);
+        if (!isGameplayActive)
+        {
+            return;
+        }
+
+        SetDiff(Diff.Advanced);
     }
     public void SetDiffExpert()
     {
-        StartGameWithDifficulty(Diff.Expert);
+        if (!isGameplayActive)
+        {
+            return;
+        }
+
+        SetDiff(Diff.Expert);
     }
 
     void StartGameWithDifficulty(Diff diff)
     {
+        StartGameAtLevel(diff, 0);
+    }
+
+    public void StartGameAtLevel(Diff diff, int levelIndex)
+    {
         activeDiff = diff;
-        activeLvlIdx = 0;
+
+        List<string> levelsForDiff;
+        if (!lvlDb.TryGetValue(diff, out levelsForDiff) || levelsForDiff.Count == 0)
+        {
+            activeLvlIdx = 0;
+            return;
+        }
+
+        activeLvlIdx = Mathf.Clamp(levelIndex, 0, levelsForDiff.Count - 1);
 
         // Hide menu and show game UI
         mainMenuPanel.SetActive(false);
@@ -287,7 +338,7 @@ public class PuzzleController : MonoBehaviour
             }
         }
 
-        if(environmentManager!=null)
+        if (environmentManager != null)
         {
             environmentManager.LoadEnvironment(diff);
         }
@@ -833,6 +884,7 @@ public class PuzzleController : MonoBehaviour
             return;
 
         gameWon = true;
+        MarkCurrentLevelCompleted();
 
         Debug.Log("PUZZLE COMPLETE IN " + moveCount + " MOVES!");
 
@@ -1096,6 +1148,70 @@ public class PuzzleController : MonoBehaviour
         {
             environmentManager.HideEnvironment();
         }
+    }
+
+    string BuildCompletionPrefKey(Diff diff, int levelIndex)
+    {
+        return CompletionPrefKeyPrefix + "." + (int)diff + "." + levelIndex;
+    }
+
+    public bool IsLevelCompleted(Diff diff, int levelIndex)
+    {
+        return PlayerPrefs.GetInt(BuildCompletionPrefKey(diff, levelIndex), 0) == 1;
+    }
+
+    public bool IsCurrentLevelCompleted()
+    {
+        return IsLevelCompleted(activeDiff, activeLvlIdx);
+    }
+
+    public int GetLevelCount(Diff diff)
+    {
+        List<string> levels;
+        if (!lvlDb.TryGetValue(diff, out levels) || levels == null)
+        {
+            return 0;
+        }
+
+        return levels.Count;
+    }
+
+    void MarkCurrentLevelCompleted()
+    {
+        string key = BuildCompletionPrefKey(activeDiff, activeLvlIdx);
+        if (PlayerPrefs.GetInt(key, 0) == 1)
+        {
+            return;
+        }
+
+        PlayerPrefs.SetInt(key, 1);
+        PlayerPrefs.Save();
+
+        Action<Diff, int, bool> callback = LevelCompletionChanged;
+        if (callback != null)
+        {
+            callback(activeDiff, activeLvlIdx, true);
+        }
+    }
+
+    public void ClearAllCompletionProgress()
+    {
+        foreach (KeyValuePair<Diff, List<string>> pair in lvlDb)
+        {
+            int count = pair.Value != null ? pair.Value.Count : 0;
+            for (int i = 0; i < count; i++)
+            {
+                PlayerPrefs.DeleteKey(BuildCompletionPrefKey(pair.Key, i));
+
+                Action<Diff, int, bool> callback = LevelCompletionChanged;
+                if (callback != null)
+                {
+                    callback(pair.Key, i, false);
+                }
+            }
+        }
+
+        PlayerPrefs.Save();
     }
 
     void PlayWinConfetti()
