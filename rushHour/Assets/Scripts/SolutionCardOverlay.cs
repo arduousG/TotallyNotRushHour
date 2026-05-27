@@ -18,6 +18,7 @@ public class SolutionCardOverlay : MonoBehaviour
 
     [Header("Data Source")]
     public string solutionFileName = "solution_alpha_sheet.txt";
+    public TextAsset solutionSheetAsset;
 
     [Header("Visual")]
     public Vector2 cardSize = new Vector2(760f, 840f);
@@ -113,7 +114,44 @@ public class SolutionCardOverlay : MonoBehaviour
 
     void LoadSolutionSheet()
     {
-        // allow file near project root from either Assets depth
+        byBoard.Clear();
+        byId.Clear();
+
+        string[] lines;
+        string source;
+        if (!TryLoadSolutionLines(out lines, out source))
+        {
+            Debug.LogWarning("Solution file not found. Tried TextAsset/Resources and project root path for: " + solutionFileName);
+            return;
+        }
+
+        ParseLines(lines);
+
+        Debug.Log("Solution sheet loaded from " + source + ". Entries by board: " + byBoard.Count + ", by id: " + byId.Count);
+    }
+
+    bool TryLoadSolutionLines(out string[] lines, out string source)
+    {
+        lines = null;
+        source = "";
+
+        if (solutionSheetAsset != null && !string.IsNullOrEmpty(solutionSheetAsset.text))
+        {
+            lines = SplitLines(solutionSheetAsset.text);
+            source = "inspector TextAsset";
+            return true;
+        }
+
+        string resourceKey = Path.GetFileNameWithoutExtension(solutionFileName);
+        TextAsset resourceAsset = Resources.Load<TextAsset>(resourceKey);
+        if (resourceAsset != null && !string.IsNullOrEmpty(resourceAsset.text))
+        {
+            lines = SplitLines(resourceAsset.text);
+            source = "Resources/" + resourceKey;
+            return true;
+        }
+
+        // allow file near project root from either Assets depth (Editor/Standalone convenience)
         string[] probePaths = new string[]
         {
             Path.GetFullPath(Path.Combine(Application.dataPath, "..", solutionFileName)),
@@ -132,14 +170,23 @@ public class SolutionCardOverlay : MonoBehaviour
 
         if (string.IsNullOrEmpty(path))
         {
-            Debug.LogWarning("Solution file not found. Checked near project root for: " + solutionFileName);
-            return;
+            return false;
         }
 
-        string[] lines = File.ReadAllLines(path);
-        ParseLines(lines);
+        lines = File.ReadAllLines(path);
+        source = path;
+        return true;
+    }
 
-        Debug.Log("Solution sheet loaded. Entries by board: " + byBoard.Count + ", by id: " + byId.Count);
+    string[] SplitLines(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+        {
+            return Array.Empty<string>();
+        }
+
+        string normalized = content.Replace("\r\n", "\n").Replace('\r', '\n');
+        return normalized.Split(new char[] { '\n' }, StringSplitOptions.None);
     }
 
     void ParseLines(string[] lines)
@@ -156,6 +203,7 @@ public class SolutionCardOverlay : MonoBehaviour
             if (raw != null)
             {
                 line = raw.Trim();
+                line = line.TrimStart('\uFEFF');
             }
 
             if (string.IsNullOrEmpty(line))

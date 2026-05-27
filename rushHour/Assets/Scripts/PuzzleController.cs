@@ -17,7 +17,14 @@ public class PuzzleController : MonoBehaviour
     public GameObject exitPrefab;
     public GameObject winText;
 
+<<<<<<< HEAD
     public EnvironmentManager environmentManager;
+=======
+    [Header("Win VFX")]
+    public ParticleSystem winConfetti;
+    public ParticleSystem winConfettiPrefab;
+    public Transform winConfettiSpawnPoint;
+>>>>>>> main
 
     public TMP_Text moveCounterText;
 
@@ -47,6 +54,8 @@ public class PuzzleController : MonoBehaviour
     public GameObject gameplayUi;
 
     private bool gameWon = false;
+
+    private bool isGameplayActive = false;
     public bool IsGameWon => gameWon;
     private int moveCount = 0;
     public int MoveCount => moveCount;
@@ -71,6 +80,7 @@ public class PuzzleController : MonoBehaviour
     //cache of last rendered selection state -> skip redundant highlight rebuild
     private CarController lastHighlightCar;
     private Vector2Int lastHighlightOrigin;
+    private ParticleSystem runtimeWinConfetti;
 
     private bool boardGenerated = false;
     private GameObject exitObject;
@@ -139,6 +149,7 @@ public class PuzzleController : MonoBehaviour
     {
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
+        isGameplayActive = true;
 
         if (!boardGenerated)
         {
@@ -166,7 +177,7 @@ public class PuzzleController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        if (isGameplayActive && Input.GetKeyDown(KeyCode.R))
         {
             ResetPuzzle();
         }
@@ -244,6 +255,7 @@ public class PuzzleController : MonoBehaviour
         // Hide menu and show game UI
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
+        isGameplayActive = true;
 
         // Create board first time, otherwise reactivate it
         if (!boardGenerated)
@@ -302,6 +314,7 @@ public class PuzzleController : MonoBehaviour
     void LoadActiveLvl()
     {
         gameWon = false;
+        StopWinConfetti();
         if (winText != null)
         {
             winText.SetActive(false);
@@ -440,6 +453,8 @@ public class PuzzleController : MonoBehaviour
 
     void ClearLiveCars()
     {
+        CarController.ClearSel();
+
         foreach (CarController car in liveCars)
         {
             if (car != null)
@@ -447,7 +462,11 @@ public class PuzzleController : MonoBehaviour
                 Destroy(car.gameObject);
             }
         }
+
         liveCars.Clear();
+        startingPositions.Clear();
+        carColorById.Clear();
+        grid = null;
     }
 
     CarSpawnData[] GetCarsFromDb(Diff diff, int lvlIdx)
@@ -803,11 +822,19 @@ public class PuzzleController : MonoBehaviour
 
         if (winText != null)
             winText.SetActive(true);
+
+        PlayWinConfetti();
     }
 
     public void ResetPuzzle()
     {
+        if (!isGameplayActive || startingPositions.Count == 0)
+        {
+            return;
+        }
+        
         gameWon = false;
+        StopWinConfetti();
         moveCount = 0;
         UpdateMoveText();
 
@@ -826,6 +853,11 @@ public class PuzzleController : MonoBehaviour
         foreach (var pair in startingPositions)
         {
             CarController car = pair.Key;
+            if (car == null)
+            {    
+                continue;
+            }
+
             Vector2Int startPos = pair.Value;
 
             car.gridPosition = startPos;
@@ -987,6 +1019,7 @@ public class PuzzleController : MonoBehaviour
     void OnDisable()
     {
         ClearMoveHighlights();
+        StopWinConfetti();
     }
 
     public void RegisterMove()
@@ -1005,13 +1038,18 @@ public class PuzzleController : MonoBehaviour
 
     public void ReturnToMenu()
     {
+        isGameplayActive = false;
+        
         mainMenuPanel.SetActive(true);
         gameplayUi.SetActive(false);
 
-        ClearLiveCars();
         ClearMoveHighlights();
+        ClearLiveCars();
+        CarController.ClearSel(); // defensive may not be necessary
 
         gameWon = false;
+
+        StopWinConfetti();
 
         if(boardTiles != null)
         {
@@ -1033,5 +1071,180 @@ public class PuzzleController : MonoBehaviour
         {
             environmentManager.HideEnvironment();
         }
+    }
+
+    void PlayWinConfetti()
+    {
+        ParticleSystem confettiToPlay = null;
+
+        //win Confetti :  either a scene instance or a prefab asset
+        //if prefab asset -> instantiate once and reuse the runtime instance
+        if (winConfetti != null)
+        {
+            if (winConfetti.gameObject.scene.IsValid())
+            {
+                confettiToPlay = winConfetti;
+            }
+            else
+            {
+                if (runtimeWinConfetti == null)
+                {
+                    runtimeWinConfetti = Instantiate(
+                        winConfetti,
+                        GetWinConfettiSpawnPosition(),
+                        Quaternion.identity
+                    );
+                }
+                else
+                {
+                    runtimeWinConfetti.transform.position = GetWinConfettiSpawnPosition();
+                }
+
+                confettiToPlay = runtimeWinConfetti;
+            }
+        }
+
+        if (confettiToPlay == null && winConfettiPrefab != null)
+        {
+            if (runtimeWinConfetti == null)
+            {
+                runtimeWinConfetti = Instantiate(
+                    winConfettiPrefab,
+                    GetWinConfettiSpawnPosition(),
+                    Quaternion.identity
+                );
+            }
+            else
+            {
+                runtimeWinConfetti.transform.position = GetWinConfettiSpawnPosition();
+            }
+
+            confettiToPlay = runtimeWinConfetti;
+        }
+
+        if (confettiToPlay == null)
+        {
+            confettiToPlay = EnsureFallbackConfetti();
+        }
+
+        if (confettiToPlay == null)
+        {
+            Debug.LogWarning("Win confetti is not assigned and fallback confetti could not be created.");
+            return;
+        }
+
+        if (!confettiToPlay.gameObject.activeSelf)
+        {
+            confettiToPlay.gameObject.SetActive(true);
+        }
+
+        confettiToPlay.Clear(true);
+        confettiToPlay.Play(true);
+    }
+
+    ParticleSystem EnsureFallbackConfetti()
+    {
+        if (runtimeWinConfetti != null)
+        {
+            runtimeWinConfetti.transform.position = GetWinConfettiSpawnPosition();
+            return runtimeWinConfetti;
+        }
+
+        GameObject fallbackObj = new GameObject("RuntimeWinConfettiFallback");
+        fallbackObj.transform.position = GetWinConfettiSpawnPosition();
+
+        ParticleSystem ps = fallbackObj.AddComponent<ParticleSystem>();
+
+        var main = ps.main;
+        main.duration = 1.8f;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.9f, 1.8f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(4.5f, 9f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.35f);
+        main.gravityModifier = 0.8f;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.maxParticles = 300;
+
+        var emission = ps.emission;
+        emission.enabled = false;
+        emission.SetBursts(new ParticleSystem.Burst[]
+        {
+            new ParticleSystem.Burst(0f, 110)
+        });
+
+        var shape = ps.shape;
+        shape.enabled = true;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 28f;
+        shape.radius = 0.2f;
+
+        var colorOverLifetime = ps.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[]
+            {
+                new GradientColorKey(new Color32(255, 82, 82, 255), 0f),
+                new GradientColorKey(new Color32(255, 210, 64, 255), 0.25f),
+                new GradientColorKey(new Color32(105, 214, 120, 255), 0.5f),
+                new GradientColorKey(new Color32(80, 172, 255, 255), 0.75f),
+                new GradientColorKey(new Color32(210, 110, 255, 255), 1f)
+            },
+            new GradientAlphaKey[]
+            {
+                new GradientAlphaKey(1f, 0f),
+                new GradientAlphaKey(1f, 0.7f),
+                new GradientAlphaKey(0f, 1f)
+            }
+        );
+        colorOverLifetime.color = gradient;
+
+        var renderer = ps.GetComponent<ParticleSystemRenderer>();
+        renderer.renderMode = ParticleSystemRenderMode.Billboard;
+
+        runtimeWinConfetti = ps;
+        return runtimeWinConfetti;
+    }
+
+    void StopWinConfetti()
+    {
+        if (winConfetti != null)
+        {
+            winConfetti.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
+        if (runtimeWinConfetti != null)
+        {
+            runtimeWinConfetti.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+    }
+
+    Vector3 GetWinConfettiSpawnPosition()
+    {
+        if (winConfettiSpawnPoint != null)
+        {
+            return winConfettiSpawnPoint.position;
+        }
+
+        Camera mainCam = Camera.main;
+        if (mainCam != null)
+        {
+            return mainCam.transform.position +
+                mainCam.transform.forward * (tileSpacing * 2f) +
+                mainCam.transform.up * (tileSpacing * 0.5f);
+        }
+
+        return transform.position + Vector3.up * tileSpacing;
+    }
+
+    void OnDestroy()
+    {
+        if (runtimeWinConfetti == null)
+        {
+            return;
+        }
+
+        Destroy(runtimeWinConfetti.gameObject);
+        runtimeWinConfetti = null;
     }
 }
