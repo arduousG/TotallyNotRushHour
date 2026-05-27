@@ -753,6 +753,7 @@ MonoBehaviour:
   carPrefab: {fileID: 7954358756618154438, guid: 3ed4a57d622e148588adc7c377700977, type: 3}
   exitPrefab: {fileID: 4981416677769274230, guid: 10c1b5a770bff43b9baf01c21388e416, type: 3}
   winText: {fileID: 902390933}
+  environmentManager: {fileID: 912831024}
   moveCounterText: {fileID: 499783472}
   cars:
   - carId: 1
@@ -816,6 +817,37 @@ MonoBehaviour:
   highlightColor: {r: 0.2, g: 0.85, b: 1, a: 0.5}
   mainMenuPanel: {fileID: 1695939974}
   gameplayUi: {fileID: 1676718248}
+--- !u!1 &664710085
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 664710086}
+  m_Layer: 0
+  m_Name: EnvironmentAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &664710086
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664710085}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &770194601
 GameObject:
   m_ObjectHideFlags: 0
@@ -1219,6 +1251,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 902390933}
   m_CullTransparentMesh: 1
+--- !u!1 &912831023
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 912831025}
+  - component: {fileID: 912831024}
+  m_Layer: 0
+  m_Name: EnvironmentManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &912831024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912831023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e4b1047bcdff408db28f1b8ffae257a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnvironmentManager
+  beginnerEnvironment: {fileID: 8952535247272974841, guid: e736ddb81260e4961ab855bcf353c9fd, type: 3}
+  intermediateEnvironment: {fileID: 2828868714849522596, guid: 635b478e0142345e9b3e741731c1de02, type: 3}
+  advancedEnvironment: {fileID: 5576360499719655820, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
+  expertEnvironment: {fileID: 0}
+--- !u!4 &912831025
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912831023}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 451.13864, y: 225.6926, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &984023628
 GameObject:
   m_ObjectHideFlags: 0
@@ -3205,3 +3285,5 @@ SceneRoots:
   - {fileID: 1091422966}
   - {fileID: 1535114889}
   - {fileID: 1226298876}
+  - {fileID: 664710086}
+  - {fileID: 912831025}

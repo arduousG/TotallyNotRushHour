@@ -17,6 +17,8 @@ public class PuzzleController : MonoBehaviour
     public GameObject exitPrefab;
     public GameObject winText;
 
+    public EnvironmentManager environmentManager;
+
     [Header("Win VFX")]
     public ParticleSystem winConfetti;
     public ParticleSystem winConfettiPrefab;
@@ -283,6 +285,11 @@ public class PuzzleController : MonoBehaviour
             {
                 exitObject.SetActive(true);
             }
+        }
+
+        if(environmentManager!=null)
+        {
+            environmentManager.LoadEnvironment(diff);
         }
 
         LoadActiveLvl();
@@ -1084,6 +1091,11 @@ public class PuzzleController : MonoBehaviour
         {
             exitObject.SetActive(false);
         }
+
+        if(environmentManager!=null)
+        {
+            environmentManager.HideEnvironment();
+        }
     }
 
     void PlayWinConfetti()
@@ -1167,6 +1179,8 @@ public class PuzzleController : MonoBehaviour
         fallbackObj.transform.position = GetWinConfettiSpawnPosition();
 
         ParticleSystem ps = fallbackObj.AddComponent<ParticleSystem>();
+
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
         var main = ps.main;
         main.duration = 1.8f;
