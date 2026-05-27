@@ -33,19 +33,22 @@ public class CarController : MonoBehaviour
         currentlySelected = null;
     }
 
-    public List<Vector2Int> GetOccupiedCells(Vector2Int origin)
-    {
-        List<Vector2Int> cells = new List<Vector2Int>();
+    public void GetOccupiedCells(Vector2Int origin, List<Vector2Int> results)
+{
+    results.Clear();
 
-        for (int i = 0; i < length; i++)
+    for (int i = 0; i < length; i++)
+    {
+        if (isHorizontal)
         {
-            if (isHorizontal)
-                cells.Add(new Vector2Int(origin.x + i, origin.y));
-            else
-                cells.Add(new Vector2Int(origin.x, origin.y + i));
+            results.Add(new Vector2Int(origin.x + i, origin.y));
         }
-        return cells;
+        else
+        {
+            results.Add(new Vector2Int(origin.x, origin.y + i));
+        }
     }
+}
 
     void Update()
     {
