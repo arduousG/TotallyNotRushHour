@@ -45,6 +45,8 @@ public class PuzzleController : MonoBehaviour
     public GameObject gameplayUi;
 
     private bool gameWon = false;
+
+    private bool isGameplayActive = false;
     public bool IsGameWon => gameWon;
     private int moveCount = 0;
     public int MoveCount => moveCount;
@@ -137,6 +139,7 @@ public class PuzzleController : MonoBehaviour
     {
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
+        isGameplayActive = true;
 
         if (!boardGenerated)
         {
@@ -164,7 +167,7 @@ public class PuzzleController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        if (isGameplayActive && Input.GetKeyDown(KeyCode.R))
         {
             ResetPuzzle();
         }
@@ -242,6 +245,7 @@ public class PuzzleController : MonoBehaviour
         // Hide menu and show game UI
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
+        isGameplayActive = true;
 
         // Create board first time, otherwise reactivate it
         if (!boardGenerated)
@@ -433,6 +437,8 @@ public class PuzzleController : MonoBehaviour
 
     void ClearLiveCars()
     {
+        CarController.ClearSel();
+
         foreach (CarController car in liveCars)
         {
             if (car != null)
@@ -440,7 +446,11 @@ public class PuzzleController : MonoBehaviour
                 Destroy(car.gameObject);
             }
         }
+
         liveCars.Clear();
+        startingPositions.Clear();
+        carColorById.Clear();
+        grid = null;
     }
 
     CarSpawnData[] GetCarsFromDb(Diff diff, int lvlIdx)
@@ -800,6 +810,11 @@ public class PuzzleController : MonoBehaviour
 
     public void ResetPuzzle()
     {
+        if (!isGameplayActive || startingPositions.Count == 0)
+        {
+            return;
+        }
+        
         gameWon = false;
         moveCount = 0;
         UpdateMoveText();
@@ -819,6 +834,11 @@ public class PuzzleController : MonoBehaviour
         foreach (var pair in startingPositions)
         {
             CarController car = pair.Key;
+            if (car == null)
+            {    
+                continue;
+            }
+
             Vector2Int startPos = pair.Value;
 
             car.gridPosition = startPos;
@@ -998,11 +1018,14 @@ public class PuzzleController : MonoBehaviour
 
     public void ReturnToMenu()
     {
+        isGameplayActive = false;
+        
         mainMenuPanel.SetActive(true);
         gameplayUi.SetActive(false);
 
-        ClearLiveCars();
         ClearMoveHighlights();
+        ClearLiveCars();
+        CarController.ClearSel(); // defensive may not be necessary
 
         gameWon = false;
 
