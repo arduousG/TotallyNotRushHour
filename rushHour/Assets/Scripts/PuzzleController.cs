@@ -181,23 +181,30 @@ public class PuzzleController : MonoBehaviour
         }
 
         // debug keys for test difficulty - b4 ADD: menu UI (level select)- 1: beginner, 2: intermediate, 3: advanced, 4: expert
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (isGameplayActive)
         {
-            SetDiff(Diff.Beginner);
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                SetDiff(Diff.Beginner);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                SetDiff(Diff.Intermediate);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                SetDiff(Diff.Advanced);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                SetDiff(Diff.Expert);
+            }
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2)) 
+        
+        if (isGameplayActive)
         {
-            SetDiff(Diff.Intermediate);
+            UpdateMoveHighlight();
         }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            SetDiff(Diff.Advanced);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            SetDiff(Diff.Expert);
-        }
-        UpdateMoveHighlight();
     }
 
     void InitLvlDb()
@@ -290,6 +297,12 @@ public class PuzzleController : MonoBehaviour
     {
         activeDiff = diff;
         activeLvlIdx = 0;
+
+        if (!isGameplayActive)
+        {
+            return;
+        }
+        
         LoadActiveLvl();
     }
     public void NextLvl()
