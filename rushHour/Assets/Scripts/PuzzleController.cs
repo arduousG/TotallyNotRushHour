@@ -17,14 +17,12 @@ public class PuzzleController : MonoBehaviour
     public GameObject exitPrefab;
     public GameObject winText;
 
-<<<<<<< HEAD
     public EnvironmentManager environmentManager;
-=======
+
     [Header("Win VFX")]
     public ParticleSystem winConfetti;
     public ParticleSystem winConfettiPrefab;
     public Transform winConfettiSpawnPoint;
->>>>>>> main
 
     public TMP_Text moveCounterText;
 
@@ -1154,6 +1152,8 @@ public class PuzzleController : MonoBehaviour
         fallbackObj.transform.position = GetWinConfettiSpawnPosition();
 
         ParticleSystem ps = fallbackObj.AddComponent<ParticleSystem>();
+
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
         var main = ps.main;
         main.duration = 1.8f;
