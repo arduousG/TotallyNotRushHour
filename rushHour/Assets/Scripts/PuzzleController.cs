@@ -17,6 +17,8 @@ public class PuzzleController : MonoBehaviour
     public GameObject exitPrefab;
     public GameObject winText;
 
+    public EnvironmentManager environmentManager;
+
     public TMP_Text moveCounterText;
 
     public CarSpawnData[] cars;
@@ -264,6 +266,11 @@ public class PuzzleController : MonoBehaviour
             {
                 exitObject.SetActive(true);
             }
+        }
+
+        if(environmentManager!=null)
+        {
+            environmentManager.LoadEnvironment(diff);
         }
 
         LoadActiveLvl();
@@ -1020,6 +1027,11 @@ public class PuzzleController : MonoBehaviour
         if(exitObject != null)
         {
             exitObject.SetActive(false);
+        }
+
+        if(environmentManager!=null)
+        {
+            environmentManager.HideEnvironment();
         }
     }
 }

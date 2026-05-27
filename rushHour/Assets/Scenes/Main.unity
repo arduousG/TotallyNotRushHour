@@ -753,6 +753,7 @@ MonoBehaviour:
   carPrefab: {fileID: 7954358756618154438, guid: 3ed4a57d622e148588adc7c377700977, type: 3}
   exitPrefab: {fileID: 4981416677769274230, guid: 10c1b5a770bff43b9baf01c21388e416, type: 3}
   winText: {fileID: 902390933}
+  environmentManager: {fileID: 912831024}
   moveCounterText: {fileID: 499783472}
   cars:
   - carId: 1
@@ -1279,11 +1280,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e4b1047bcdff408db28f1b8ffae257a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnvironmentManager
-  beginnerEnvironment: {fileID: 0}
-  intermediateEnvironment: {fileID: 0}
+  beginnerEnvironment: {fileID: 8952535247272974841, guid: e736ddb81260e4961ab855bcf353c9fd, type: 3}
+  intermediateEnvironment: {fileID: 2828868714849522596, guid: 635b478e0142345e9b3e741731c1de02, type: 3}
   advancedEnvironment: {fileID: 0}
   expertEnvironment: {fileID: 0}
-  environmentAnchor: {fileID: 664710086}
 --- !u!4 &912831025
 Transform:
   m_ObjectHideFlags: 0

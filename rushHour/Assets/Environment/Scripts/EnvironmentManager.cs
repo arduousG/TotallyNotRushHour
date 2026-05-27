@@ -7,52 +7,51 @@ public class EnvironmentManager : MonoBehaviour
     public GameObject advancedEnvironment;
     public GameObject expertEnvironment;
 
-    public Transform environmentAnchor;
-
     private GameObject currentEnvironment;
 
-    public void LoadEnvironment(PuzzleController.Diff difficulty)
+    public void LoadEnvironment(PuzzleController.Diff diff)
     {
-        if(currentEnvironment != null)
-        {
-            Destroy(currentEnvironment);
-        }
+        Debug.Log("Loading environment: " + diff);
 
-        GameObject environmentToSpawn=null;
+        HideEnvironment();
 
-        switch(difficulty)
+        GameObject envToLoad = null;
+
+        switch(diff)
         {
             case PuzzleController.Diff.Beginner:
-                environmentToSpawn=beginnerEnvironment;
+                envToLoad = beginnerEnvironment;
                 break;
 
             case PuzzleController.Diff.Intermediate:
-                environmentToSpawn=intermediateEnvironment;
+                envToLoad = intermediateEnvironment;
                 break;
 
             case PuzzleController.Diff.Advanced:
-                environmentToSpawn=advancedEnvironment;
+                envToLoad = advancedEnvironment;
                 break;
 
             case PuzzleController.Diff.Expert:
-                environmentToSpawn=expertEnvironment;
+                envToLoad = expertEnvironment;
                 break;
         }
 
-        if(environmentToSpawn!=null)
+        if(envToLoad != null)
         {
-            currentEnvironment=
-                Instantiate(
-                    environmentToSpawn,
-                    environmentAnchor.position,
-                    Quaternion.identity
-                );
+            currentEnvironment =
+                Instantiate(envToLoad);
+
+            Debug.Log("Environment spawned");
+        }
+        else
+        {
+            Debug.Log("Environment prefab missing");
         }
     }
 
     public void HideEnvironment()
     {
-        if(currentEnvironment!=null)
+        if(currentEnvironment != null)
         {
             Destroy(currentEnvironment);
         }
