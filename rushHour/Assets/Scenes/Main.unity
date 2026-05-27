@@ -2238,7 +2238,7 @@ MonoBehaviour:
   beginnerEnvironment: {fileID: 8952535247272974841, guid: e736ddb81260e4961ab855bcf353c9fd, type: 3}
   intermediateEnvironment: {fileID: 2828868714849522596, guid: 635b478e0142345e9b3e741731c1de02, type: 3}
   advancedEnvironment: {fileID: 5576360499719655820, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
-  expertEnvironment: {fileID: 0}
+  expertEnvironment: {fileID: 2690329019356924053, guid: 9566e499820e3427d90940b22f4d9aa9, type: 3}
 --- !u!4 &912831025
 Transform:
   m_ObjectHideFlags: 0
@@ -3230,6 +3230,7 @@ MonoBehaviour:
   showOnStart: 0
   solutionFileName: solution_alpha_sheet.txt
   solutionSheetAsset: {fileID: 0}
+  solvedLevelsJsonAsset: {fileID: 0}
   cardSize: {x: 560, y: 700}
 --- !u!4 &1226298876
 Transform:
