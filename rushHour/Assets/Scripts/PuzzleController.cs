@@ -81,6 +81,8 @@ public class PuzzleController : MonoBehaviour
     private ParticleSystem runtimeWinConfetti;
 
     private bool boardGenerated = false;
+    private readonly List<Vector2Int> occupiedCellBuffer = new List<Vector2Int>(3);
+    private readonly List<Vector2Int> highlightOccupiedCellBuffer = new List<Vector2Int>(3);
     private GameObject exitObject;
     private GameObject[,] boardTiles;
 
@@ -302,7 +304,7 @@ public class PuzzleController : MonoBehaviour
         {
             return;
         }
-        
+
         LoadActiveLvl();
     }
     public void NextLvl()
@@ -701,8 +703,10 @@ public class PuzzleController : MonoBehaviour
                 // tracked for full cleanup when loading next difficulty/level
                 liveCars.Add(controller);
 
-                foreach (var cell in controller.GetOccupiedCells(car.gridPosition))
+                controller.GetOccupiedCells(car.gridPosition, occupiedCellBuffer);
+                for (int i = 0; i < occupiedCellBuffer.Count; i++)
                 {
+                    Vector2Int cell = occupiedCellBuffer[i];
                     if (IsInsideBoard(cell))
                     {
                         grid[cell.x, cell.y] = controller;
@@ -730,10 +734,12 @@ public class PuzzleController : MonoBehaviour
 
     public bool  CanPlaceCar(CarController car, Vector2Int newOrigin)
     {
-        var cells = car.GetOccupiedCells(newOrigin);
+        car.GetOccupiedCells(newOrigin, occupiedCellBuffer);
 
-        foreach (var cell in cells)
+        for (int i = 0; i < occupiedCellBuffer.Count; i++)
         {
+            Vector2Int cell = occupiedCellBuffer[i];
+
             if (!IsInsideBoard(cell))
             {
                 if (!IsExitCell(cell, car))
@@ -756,16 +762,20 @@ public class PuzzleController : MonoBehaviour
 
     public void SetCarPosition(CarController car, Vector2Int oldOrigin, Vector2Int newOrigin)
     {
-        foreach (var cell in car.GetOccupiedCells(oldOrigin))
+        car.GetOccupiedCells(oldOrigin, occupiedCellBuffer);
+        for (int i = 0; i < occupiedCellBuffer.Count; i++)
         {
+            Vector2Int cell = occupiedCellBuffer[i];
             if (IsInsideBoard(cell))
             {
                 grid[cell.x, cell.y] = null;
             }
         }
 
-        foreach (var cell in car.GetOccupiedCells(newOrigin))
+        car.GetOccupiedCells(newOrigin, occupiedCellBuffer);
+        for (int i = 0; i < occupiedCellBuffer.Count; i++)
         {
+            Vector2Int cell = occupiedCellBuffer[i];
             if (IsInsideBoard(cell))
             {
                 grid[cell.x, cell.y] = car;
@@ -806,9 +816,10 @@ public class PuzzleController : MonoBehaviour
             return;
 
         
-        foreach (var cell in car.GetOccupiedCells(car.gridPosition))
+        car.GetOccupiedCells(car.gridPosition, occupiedCellBuffer);
+        for (int i = 0; i < occupiedCellBuffer.Count; i++)
         {
-            if (IsExitCell(cell, car))
+            if (IsExitCell(occupiedCellBuffer[i], car))
             {
                 Win();
                 return;
@@ -878,8 +889,10 @@ public class PuzzleController : MonoBehaviour
                 car.length
             );
 
-            foreach (var cell in car.GetOccupiedCells(startPos))
+            car.GetOccupiedCells(startPos, occupiedCellBuffer);
+            for (int i = 0; i < occupiedCellBuffer.Count; i++)
             {
+                Vector2Int cell = occupiedCellBuffer[i];
                 if (IsInsideBoard(cell))
                 {
                     grid[cell.x, cell.y] = car;
@@ -917,12 +930,13 @@ public class PuzzleController : MonoBehaviour
         HashSet<Vector2Int> cellsToHighlight = new HashSet<Vector2Int>();
         for (int i = 0; i < validOrigins.Count; i++)
         {
-            List<Vector2Int> occupied = selected.GetOccupiedCells(validOrigins[i]);
-            for (int c = 0; c < occupied.Count; c++)
+            selected.GetOccupiedCells(validOrigins[i], highlightOccupiedCellBuffer);
+            for (int c = 0; c < highlightOccupiedCellBuffer.Count; c++)
             {
-                if (IsInsideBoard(occupied[c]))
+                Vector2Int occupied = highlightOccupiedCellBuffer[c];
+                if (IsInsideBoard(occupied))
                 {
-                    cellsToHighlight.Add(occupied[c]);
+                    cellsToHighlight.Add(occupied);
                 }
             }
         }
