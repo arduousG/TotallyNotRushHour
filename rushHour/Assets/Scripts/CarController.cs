@@ -114,7 +114,7 @@ public class CarController : MonoBehaviour
         gridPosition = newOrigin;
         transform.position = GridToWorld(gridPosition);
 
-        puzzle.RegisterMove(); // so move counter matches with steps taken in solution overlay card
+        puzzle.RegisterMove(this, direction); // group repeated steps on one car/direction as one solution-style move
 
         puzzle.CheckWin(this);
         if (puzzle.IsGameWon)

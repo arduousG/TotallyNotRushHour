@@ -94,6 +94,8 @@ public class PuzzleController : MonoBehaviour
     private int moveCount = 0;
     public int MoveCount => moveCount;
     public bool IsEndlessMode => isEndlessMode;
+    private CarController lastScoredMoveCar;
+    private Vector2Int lastScoredMoveDirection;
 
     private CarController[,] grid;
     private Dictionary<CarController, Vector2Int> startingPositions = 
@@ -569,6 +571,7 @@ public class PuzzleController : MonoBehaviour
         }
 
         moveCount = 0;
+        ResetMoveGrouping();
         UpdateMoveText();
 
         //new level, clean runtime state before rebuild: clear old spawned cars + selected state first
@@ -1110,6 +1113,7 @@ public class PuzzleController : MonoBehaviour
         gameWon = false;
         StopWinConfetti();
         moveCount = 0;
+        ResetMoveGrouping();
         UpdateMoveText();
 
         AudioManager audioManager = AudioManager.Instance;
@@ -1299,10 +1303,26 @@ public class PuzzleController : MonoBehaviour
         StopWinConfetti();
     }
 
-    public void RegisterMove()
+    public void RegisterMove(CarController car, Vector2Int direction)
     {
-        moveCount++;
-        UpdateMoveText();
+        if (car == null)
+        {
+            return;
+        }
+
+        if (car != lastScoredMoveCar || direction != lastScoredMoveDirection)
+        {
+            moveCount++;
+            lastScoredMoveCar = car;
+            lastScoredMoveDirection = direction;
+            UpdateMoveText();
+        }
+    }
+
+    void ResetMoveGrouping()
+    {
+        lastScoredMoveCar = null;
+        lastScoredMoveDirection = Vector2Int.zero;
     }
 
     void UpdateMoveText()
