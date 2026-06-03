@@ -92,6 +92,10 @@ public class SolutionCardOverlay : MonoBehaviour
     void Start()
     {
         EnsurePuzzleReference(logIfMissing: true);
+        if (puzzle != null)
+        {
+            puzzle.LevelLoaded += OnPuzzleLevelLoaded;
+        }
 
         LoadSolutionSheet();
         CreateUi();
@@ -102,6 +106,14 @@ public class SolutionCardOverlay : MonoBehaviour
         if (isVisible)
         {
             RefreshCard();
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (puzzle != null)
+        {
+            puzzle.LevelLoaded -= OnPuzzleLevelLoaded;
         }
     }
 
@@ -127,6 +139,17 @@ public class SolutionCardOverlay : MonoBehaviour
         }
 
         if (curId != lastShownId || curBoard != lastShownBoard)
+        {
+            RefreshCard();
+        }
+    }
+
+    void OnPuzzleLevelLoaded()
+    {
+        lastShownId = "";
+        lastShownBoard = "";
+
+        if (isVisible)
         {
             RefreshCard();
         }
@@ -919,7 +942,7 @@ public class SolutionCardOverlay : MonoBehaviour
 
         if (piece >= 'A' && piece <= 'Y')
         {
-            return (piece - 'A') + 1;
+            return piece - 'A';
         }
 
         return -1;

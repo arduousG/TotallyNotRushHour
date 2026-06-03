@@ -8,6 +8,7 @@ public class PuzzleController : MonoBehaviour
 {
     public event Action<Diff, int, bool> LevelCompletionChanged;
     public event Action<PuzzleCompletionResult> PuzzleCompleted;
+    public event Action LevelLoaded;
 
     public enum Diff
     {
@@ -597,6 +598,12 @@ public class PuzzleController : MonoBehaviour
         SpawnCars();
         UpdateMoveHighlight();
         levelStartTime = Time.time;
+
+        Action levelLoadedCallback = LevelLoaded;
+        if (levelLoadedCallback != null)
+        {
+            levelLoadedCallback();
+        }
     }
 
     bool IsValidLvl(CarSpawnData[] inCars)
