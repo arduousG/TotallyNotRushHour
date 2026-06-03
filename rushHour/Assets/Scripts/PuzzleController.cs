@@ -57,6 +57,7 @@ public class PuzzleController : MonoBehaviour
     [Header("Menu")]
     public GameObject mainMenuPanel;
     public GameObject gameplayUi;
+    public Color mainMenuBackgroundColor = new Color(0.06f, 0.075f, 0.09f, 0.96f);
 
     [Header("Settings and Help")]
     public GameObject settingsPanel;
@@ -127,6 +128,7 @@ public class PuzzleController : MonoBehaviour
     private readonly List<Vector2Int> highlightOccupiedCellBuffer = new List<Vector2Int>(3);
     private GameObject exitObject;
     private GameObject[,] boardTiles;
+    private GameObject runtimeMainMenuBackground;
     private const string CompletionPrefKeyPrefix = "rushhour.level.completed";
 
     public string CurrentBoardString
@@ -203,6 +205,7 @@ public class PuzzleController : MonoBehaviour
 
         mainMenuPanel.SetActive(true);
         gameplayUi.SetActive(false);
+        EnsureMainMenuBackground();
         InitializeUiPanels();
         InitializeAudioSettingsUi();
         EnsureEndlessModeController();
@@ -1396,6 +1399,7 @@ public class PuzzleController : MonoBehaviour
 
     void InitializeUiPanels()
     {
+        EnsureMainMenuBackground();
         SetPanelActive(settingsPanel, false);
         SetPanelActive(rulesControlsPanel, false);
 
@@ -1624,6 +1628,47 @@ public class PuzzleController : MonoBehaviour
         if (endlessModeController.environmentManager == null)
         {
             endlessModeController.environmentManager = environmentManager;
+        }
+    }
+
+    void EnsureMainMenuBackground()
+    {
+        if (mainMenuPanel == null)
+        {
+            return;
+        }
+
+        if (runtimeMainMenuBackground == null)
+        {
+            Transform existing = mainMenuPanel.transform.Find("RuntimeMainMenuBackground");
+            if (existing != null)
+            {
+                runtimeMainMenuBackground = existing.gameObject;
+            }
+        }
+
+        if (runtimeMainMenuBackground == null)
+        {
+            runtimeMainMenuBackground = new GameObject("RuntimeMainMenuBackground", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            runtimeMainMenuBackground.transform.SetParent(mainMenuPanel.transform, false);
+            runtimeMainMenuBackground.transform.SetAsFirstSibling();
+        }
+
+        RectTransform rect = runtimeMainMenuBackground.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.anchorMin = new Vector2(-20f, -20f);
+            rect.anchorMax = new Vector2(20f, 20f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            rect.localScale = Vector3.one;
+        }
+
+        Image image = runtimeMainMenuBackground.GetComponent<Image>();
+        if (image != null)
+        {
+            image.color = mainMenuBackgroundColor;
+            image.raycastTarget = false;
         }
     }
 
