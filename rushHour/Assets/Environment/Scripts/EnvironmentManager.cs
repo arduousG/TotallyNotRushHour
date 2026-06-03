@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 public class EnvironmentManager : MonoBehaviour
 {
@@ -9,18 +11,33 @@ public class EnvironmentManager : MonoBehaviour
 
     [Header("Endless Sky")]
     public Material endlessSkyboxMaterial;
-    public Light sunLight;
+    public bool useRuntimeEndlessSun = true;
+    [FormerlySerializedAs("sunLight")]
+    public Light sunLightTemplate;
     public float endlessTimeOfDay = 0.3f;
     public float ambientIntensity = 0.85f;
     public Gradient ambientSkyGradient;
     public Gradient sunColorGradient;
     public bool animateEndlessTime = true;
     public float realtimeDayLengthSeconds = 240f;
+    public float dynamicGiRefreshInterval = 1f;
 
     private GameObject currentEnvironment;
     private Material runtimeEndlessSkybox;
     private Material previousSkybox;
+    private Light previousSun;
+    private Color previousAmbientLight;
+    private float previousAmbientIntensity;
+    private AmbientMode previousAmbientMode;
+    private bool previousSunWasEnabled;
+    private bool sunTemplateWasEnabled;
+    private bool disabledPreviousSun;
+    private bool disabledSunTemplate;
+    private Light runtimeEndlessSunLight;
+    private Light activeEndlessSunLight;
     private bool endlessSkyActive;
+    private bool hasSavedRenderSettings;
+    private float lastDynamicGiRefreshTime = -999f;
 
     void Awake()
     {
@@ -34,7 +51,7 @@ public class EnvironmentManager : MonoBehaviour
             return;
         }
 
-        SetEndlessTime(endlessTimeOfDay + Time.deltaTime / realtimeDayLengthSeconds);
+        SetEndlessTime(endlessTimeOfDay + Time.deltaTime / realtimeDayLengthSeconds, false);
     }
 
     public void LoadEnvironment(PuzzleController.Diff diff)
@@ -92,7 +109,7 @@ public class EnvironmentManager : MonoBehaviour
 
         if (!endlessSkyActive)
         {
-            previousSkybox = RenderSettings.skybox;
+            SaveRenderSettings();
         }
 
         runtimeEndlessSkybox = GetOrCreateEndlessSkybox();
@@ -101,8 +118,15 @@ public class EnvironmentManager : MonoBehaviour
             RenderSettings.skybox = runtimeEndlessSkybox;
         }
 
+        activeEndlessSunLight = GetOrCreateEndlessSunLight();
+        if (activeEndlessSunLight != null)
+        {
+            DisableSceneSunLightsForEndless();
+            RenderSettings.sun = activeEndlessSunLight;
+        }
+
         endlessSkyActive = true;
-        SetEndlessTime(endlessTimeOfDay);
+        SetEndlessTime(endlessTimeOfDay, true);
     }
 
     public void AdvanceEndlessTime(float amount)
@@ -112,10 +136,15 @@ public class EnvironmentManager : MonoBehaviour
             LoadEndlessEnvironment();
         }
 
-        SetEndlessTime(endlessTimeOfDay + amount);
+        SetEndlessTime(endlessTimeOfDay + amount, true);
     }
 
     public void SetEndlessTime(float normalizedTime)
+    {
+        SetEndlessTime(normalizedTime, true);
+    }
+
+    void SetEndlessTime(float normalizedTime, bool forceEnvironmentRefresh)
     {
         endlessTimeOfDay = Mathf.Repeat(normalizedTime, 1f);
 
@@ -136,14 +165,14 @@ public class EnvironmentManager : MonoBehaviour
             }
         }
 
-        if (sunLight != null)
+        if (activeEndlessSunLight != null)
         {
-            sunLight.color = sunColorGradient.Evaluate(endlessTimeOfDay);
-            sunLight.intensity = Mathf.Lerp(0.15f, 1.15f, Mathf.Clamp01(Mathf.Sin(endlessTimeOfDay * Mathf.PI)));
-            sunLight.transform.rotation = Quaternion.Euler((endlessTimeOfDay * 360f) - 90f, 170f, 0f);
+            activeEndlessSunLight.color = sunColorGradient.Evaluate(endlessTimeOfDay);
+            activeEndlessSunLight.intensity = Mathf.Lerp(0.15f, 1.15f, Mathf.Clamp01(Mathf.Sin(endlessTimeOfDay * Mathf.PI)));
+            activeEndlessSunLight.transform.rotation = Quaternion.Euler((endlessTimeOfDay * 360f) - 90f, 170f, 0f);
         }
 
-        DynamicGI.UpdateEnvironment();
+        RefreshDynamicGiIfNeeded(forceEnvironmentRefresh);
     }
 
     void DisableEndlessSky()
@@ -154,8 +183,118 @@ public class EnvironmentManager : MonoBehaviour
         }
 
         endlessSkyActive = false;
+        RestoreRenderSettings();
+        DestroyRuntimeEndlessSun();
+        RefreshDynamicGiIfNeeded(true);
+    }
+
+    void SaveRenderSettings()
+    {
+        previousSkybox = RenderSettings.skybox;
+        previousSun = RenderSettings.sun;
+        previousAmbientLight = RenderSettings.ambientLight;
+        previousAmbientIntensity = RenderSettings.ambientIntensity;
+        previousAmbientMode = RenderSettings.ambientMode;
+        previousSunWasEnabled = previousSun != null && previousSun.enabled;
+        sunTemplateWasEnabled = sunLightTemplate != null && sunLightTemplate.enabled;
+        hasSavedRenderSettings = true;
+    }
+
+    void RestoreRenderSettings()
+    {
+        if (!hasSavedRenderSettings)
+        {
+            return;
+        }
+
         RenderSettings.skybox = previousSkybox;
-        DynamicGI.UpdateEnvironment();
+        RenderSettings.sun = previousSun;
+        RenderSettings.ambientMode = previousAmbientMode;
+        RenderSettings.ambientLight = previousAmbientLight;
+        RenderSettings.ambientIntensity = previousAmbientIntensity;
+        RestoreSceneSunLights();
+        hasSavedRenderSettings = false;
+        activeEndlessSunLight = null;
+    }
+
+    void DisableSceneSunLightsForEndless()
+    {
+        if (!useRuntimeEndlessSun)
+        {
+            return;
+        }
+
+        if (previousSun != null && previousSun != activeEndlessSunLight && previousSun.enabled)
+        {
+            previousSun.enabled = false;
+            disabledPreviousSun = true;
+        }
+
+        if (sunLightTemplate != null && sunLightTemplate != previousSun && sunLightTemplate != activeEndlessSunLight && sunLightTemplate.enabled)
+        {
+            sunLightTemplate.enabled = false;
+            disabledSunTemplate = true;
+        }
+    }
+
+    void RestoreSceneSunLights()
+    {
+        if (disabledPreviousSun && previousSun != null)
+        {
+            previousSun.enabled = previousSunWasEnabled;
+        }
+
+        if (disabledSunTemplate && sunLightTemplate != null)
+        {
+            sunLightTemplate.enabled = sunTemplateWasEnabled;
+        }
+
+        disabledPreviousSun = false;
+        disabledSunTemplate = false;
+    }
+
+    Light GetOrCreateEndlessSunLight()
+    {
+        if (!useRuntimeEndlessSun)
+        {
+            return sunLightTemplate;
+        }
+
+        if (runtimeEndlessSunLight != null)
+        {
+            runtimeEndlessSunLight.gameObject.SetActive(true);
+            return runtimeEndlessSunLight;
+        }
+
+        GameObject sunObj = new GameObject("EndlessRuntimeSun");
+        runtimeEndlessSunLight = sunObj.AddComponent<Light>();
+        runtimeEndlessSunLight.type = LightType.Directional;
+
+        if (sunLightTemplate != null)
+        {
+            runtimeEndlessSunLight.color = sunLightTemplate.color;
+            runtimeEndlessSunLight.intensity = sunLightTemplate.intensity;
+            runtimeEndlessSunLight.shadows = sunLightTemplate.shadows;
+            runtimeEndlessSunLight.shadowStrength = sunLightTemplate.shadowStrength;
+            runtimeEndlessSunLight.shadowBias = sunLightTemplate.shadowBias;
+            runtimeEndlessSunLight.shadowNormalBias = sunLightTemplate.shadowNormalBias;
+            runtimeEndlessSunLight.transform.rotation = sunLightTemplate.transform.rotation;
+        }
+
+        return runtimeEndlessSunLight;
+    }
+
+    void DestroyRuntimeEndlessSun()
+    {
+        activeEndlessSunLight = null;
+
+        if (runtimeEndlessSunLight == null)
+        {
+            return;
+        }
+
+        Destroy(runtimeEndlessSunLight.gameObject);
+        runtimeEndlessSunLight = null;
     }
 
     Material GetOrCreateEndlessSkybox()
@@ -220,5 +359,16 @@ public class EnvironmentManager : MonoBehaviour
                 },
                 new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
         }
+    }
+
+    void RefreshDynamicGiIfNeeded(bool force)
+    {
+        if (!force && dynamicGiRefreshInterval > 0f && Time.unscaledTime - lastDynamicGiRefreshTime < dynamicGiRefreshInterval)
+        {
+            return;
+        }
+
+        lastDynamicGiRefreshTime = Time.unscaledTime;
+        DynamicGI.UpdateEnvironment();
     }
 }

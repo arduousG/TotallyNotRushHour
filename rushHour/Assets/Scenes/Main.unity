@@ -2009,6 +2009,7 @@ MonoBehaviour:
   useDynLvls: 1
   activeDiff: 0
   activeLvlIdx: 0
+  endlessModeController: {fileID: 0}
   showValidMoveHighlight: 1
   highlightColor: {r: 0.2, g: 0.85, b: 1, a: 0.5}
   mainMenuPanel: {fileID: 1695939974}
@@ -3924,6 +3925,72 @@ MonoBehaviour:
   intermediateEnvironment: {fileID: 2828868714849522596, guid: 635b478e0142345e9b3e741731c1de02, type: 3}
   advancedEnvironment: {fileID: 5576360499719655820, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
   expertEnvironment: {fileID: 2690329019356924053, guid: 9566e499820e3427d90940b22f4d9aa9, type: 3}
+  endlessSkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  sunLight: {fileID: 418214407}
+  endlessTimeOfDay: 0.3
+  ambientIntensity: 0.85
+  ambientSkyGradient:
+    serializedVersion: 2
+    key0: {r: 0.9811321, g: 0.9811321, b: 0.9811321, a: 1}
+    key1: {r: 0, g: 0.050427433, b: 0.3301887, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  sunColorGradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 0.88550174, b: 0, a: 1}
+    key1: {r: 0, g: 0.5377358, b: 0.49539378, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 386
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  animateEndlessTime: 1
+  realtimeDayLengthSeconds: 240
 --- !u!4 &912831025
 Transform:
   m_ObjectHideFlags: 0
