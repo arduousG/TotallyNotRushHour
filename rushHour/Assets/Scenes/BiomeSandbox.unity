@@ -496,6 +496,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4593709324087548293, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -186.62894
+      objectReference: {fileID: 0}
+    - target: {fileID: 4593709324087548293, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 248.78062
+      objectReference: {fileID: 0}
+    - target: {fileID: 4593709324087548293, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.4524853
+      objectReference: {fileID: 0}
+    - target: {fileID: 4593709324087548293, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.8917719
+      objectReference: {fileID: 0}
+    - target: {fileID: 4593709324087548293, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 126.194
+      objectReference: {fileID: 0}
     - target: {fileID: 5576360499719655820, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
       propertyPath: m_Name
       value: SnowEnvironment
@@ -520,6 +540,10 @@ PrefabInstance:
     - target: {fileID: 2690329019356924053, guid: 9566e499820e3427d90940b22f4d9aa9, type: 3}
       propertyPath: m_Name
       value: NeonEnvironment
+      objectReference: {fileID: 0}
+    - target: {fileID: 2690329019356924053, guid: 9566e499820e3427d90940b22f4d9aa9, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4573284537334247994, guid: 9566e499820e3427d90940b22f4d9aa9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -561,6 +585,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6156908559548691146, guid: 9566e499820e3427d90940b22f4d9aa9, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e36fd2a7c681b46d68ef16dc460b898b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

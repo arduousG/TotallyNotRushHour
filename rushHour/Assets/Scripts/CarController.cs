@@ -200,11 +200,14 @@ public class CarController : MonoBehaviour
 
     void OnMouseDrag()
     {
+        if(puzzle != null && puzzle.IsGameWon)
+            return;
+
         if (IsPointerOverUi())
         {
             return;
         }
-
+        
         Vector3 mouseDelta = Input.mousePosition - dragStartMousePos;
 
         if (isHorizontal)
