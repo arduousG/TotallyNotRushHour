@@ -1022,6 +1022,13 @@ public class PuzzleController : MonoBehaviour
             position,
             Quaternion.identity
         );
+
+        ExitMarkerGlow exitGlow = exitObject.GetComponent<ExitMarkerGlow>();
+        if (exitGlow == null)
+        {
+            exitGlow = exitObject.AddComponent<ExitMarkerGlow>();
+        }
+        exitGlow.ApplyGlow();
     }
 
     public bool IsExitCell(Vector2Int cell, CarController car)

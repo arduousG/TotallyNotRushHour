@@ -19,8 +19,13 @@ public class EnvironmentManager : MonoBehaviour
     public Gradient ambientSkyGradient;
     public Gradient sunColorGradient;
     public bool animateEndlessTime = true;
+    public bool updateGlobalSkyDuringRealtimeAnimation = false;
+    public bool clampEndlessLightingColors = true;
     public float realtimeDayLengthSeconds = 240f;
     public float dynamicGiRefreshInterval = 1f;
+    public float maxGradientColorChannel = 1f;
+    public float maxSunIntensity = 1.15f;
+    public float maxSkyExposure = 1.15f;
 
     private GameObject currentEnvironment;
     private Material runtimeEndlessSkybox;
@@ -44,6 +49,16 @@ public class EnvironmentManager : MonoBehaviour
         EnsureDefaultGradients();
     }
 
+    void OnDisable()
+    {
+        DisableEndlessSky();
+    }
+
+    void OnDestroy()
+    {
+        DisableEndlessSky();
+    }
+
     void Update()
     {
         if (!endlessSkyActive || !animateEndlessTime || realtimeDayLengthSeconds <= 0f)
@@ -51,7 +66,15 @@ public class EnvironmentManager : MonoBehaviour
             return;
         }
 
-        SetEndlessTime(endlessTimeOfDay + Time.deltaTime / realtimeDayLengthSeconds, false);
+        endlessTimeOfDay = Mathf.Repeat(endlessTimeOfDay + Time.deltaTime / realtimeDayLengthSeconds, 1f);
+
+        if (updateGlobalSkyDuringRealtimeAnimation)
+        {
+            ApplyEndlessLighting(false);
+            return;
+        }
+
+        ApplyEndlessSun();
     }
 
     public void LoadEnvironment(PuzzleController.Diff diff)
@@ -147,8 +170,13 @@ public class EnvironmentManager : MonoBehaviour
     void SetEndlessTime(float normalizedTime, bool forceEnvironmentRefresh)
     {
         endlessTimeOfDay = Mathf.Repeat(normalizedTime, 1f);
+        ApplyEndlessLighting(forceEnvironmentRefresh);
+    }
 
-        Color ambientColor = ambientSkyGradient.Evaluate(endlessTimeOfDay);
+    void ApplyEndlessLighting(bool forceEnvironmentRefresh)
+    {
+        Color ambientColor = EvaluateEndlessGradient(ambientSkyGradient, endlessTimeOfDay);
+
         RenderSettings.ambientLight = ambientColor * ambientIntensity;
 
         if (runtimeEndlessSkybox != null)
@@ -161,18 +189,22 @@ public class EnvironmentManager : MonoBehaviour
             if (runtimeEndlessSkybox.HasProperty("_Exposure"))
             {
                 float daylight = Mathf.Clamp01(Mathf.Sin(endlessTimeOfDay * Mathf.PI));
-                runtimeEndlessSkybox.SetFloat("_Exposure", Mathf.Lerp(0.45f, 1.25f, daylight));
+                runtimeEndlessSkybox.SetFloat("_Exposure", Mathf.Min(maxSkyExposure, Mathf.Lerp(0.45f, 1.15f, daylight)));
             }
         }
 
+        ApplyEndlessSun();
+        RefreshDynamicGiIfNeeded(forceEnvironmentRefresh);
+    }
+
+    void ApplyEndlessSun()
+    {
         if (activeEndlessSunLight != null)
         {
-            activeEndlessSunLight.color = sunColorGradient.Evaluate(endlessTimeOfDay);
-            activeEndlessSunLight.intensity = Mathf.Lerp(0.15f, 1.15f, Mathf.Clamp01(Mathf.Sin(endlessTimeOfDay * Mathf.PI)));
+            activeEndlessSunLight.color = EvaluateEndlessGradient(sunColorGradient, endlessTimeOfDay);
+            activeEndlessSunLight.intensity = Mathf.Min(maxSunIntensity, Mathf.Lerp(0.15f, 1.15f, Mathf.Clamp01(Mathf.Sin(endlessTimeOfDay * Mathf.PI))));
             activeEndlessSunLight.transform.rotation = Quaternion.Euler((endlessTimeOfDay * 360f) - 90f, 170f, 0f);
         }
-
-        RefreshDynamicGiIfNeeded(forceEnvironmentRefresh);
     }
 
     void DisableEndlessSky()
@@ -370,5 +402,26 @@ public class EnvironmentManager : MonoBehaviour
 
         lastDynamicGiRefreshTime = Time.unscaledTime;
         DynamicGI.UpdateEnvironment();
+    }
+
+    Color EvaluateEndlessGradient(Gradient gradient, float time)
+    {
+        if (gradient == null)
+        {
+            return Color.white;
+        }
+
+        Color color = gradient.Evaluate(time);
+        if (!clampEndlessLightingColors)
+        {
+            return color;
+        }
+
+        float maxChannel = Mathf.Max(0f, maxGradientColorChannel);
+        color.r = Mathf.Clamp(color.r, 0f, maxChannel);
+        color.g = Mathf.Clamp(color.g, 0f, maxChannel);
+        color.b = Mathf.Clamp(color.b, 0f, maxChannel);
+        color.a = Mathf.Clamp01(color.a);
+        return color;
     }
 }
