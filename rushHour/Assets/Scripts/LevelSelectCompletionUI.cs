@@ -45,12 +45,24 @@ public class LevelSelectCompletionUI : MonoBehaviour
     private bool hasSelectedDiff;
     private PuzzleController.Diff selectedDiff;
 
-    void Start()
+    bool EnsurePuzzleReference(bool logIfMissing)
     {
         if (puzzle == null)
         {
             puzzle = UnityEngine.Object.FindFirstObjectByType<PuzzleController>();
         }
+
+        if (puzzle == null && logIfMissing)
+        {
+            Debug.LogWarning("LevelSelectCompletionUI could not find PuzzleController.");
+        }
+
+        return puzzle != null;
+    }
+
+    void Start()
+    {
+        EnsurePuzzleReference(logIfMissing: true);
 
         BindDifficultyButtons();
         BindBackButton();
@@ -66,6 +78,8 @@ public class LevelSelectCompletionUI : MonoBehaviour
 
     void OnEnable()
     {
+        EnsurePuzzleReference(logIfMissing: false);
+
         //when ret from gameplay -> always open again at top level difficulty menu
         ShowDifficultyMenu();
     }
@@ -94,6 +108,12 @@ public class LevelSelectCompletionUI : MonoBehaviour
 
             entry.button.onClick.AddListener(delegate
             {
+                AudioManager audioManager = AudioManager.Instance;
+                if (audioManager != null)
+                {
+                    audioManager.PlayUIClick();
+                }
+
                 if (puzzle == null)
                 {
                     return;
@@ -132,6 +152,12 @@ public class LevelSelectCompletionUI : MonoBehaviour
         backToDifficultyButton.onClick.RemoveAllListeners();
         backToDifficultyButton.onClick.AddListener(delegate
         {
+            AudioManager audioManager = AudioManager.Instance;
+            if (audioManager != null)
+            {
+                audioManager.PlayUIClick();
+            }
+
             ShowDifficultyMenu();
         });
     }
@@ -191,6 +217,7 @@ public class LevelSelectCompletionUI : MonoBehaviour
 
     public void RefreshAll()
     {
+        EnsurePuzzleReference(logIfMissing: false);
         RefreshDifficultyButtons();
 
         if (!hasSelectedDiff)
@@ -271,6 +298,12 @@ public class LevelSelectCompletionUI : MonoBehaviour
                 levelEntry.button.interactable = true;
                 levelEntry.button.onClick.AddListener(delegate
                 {
+                    AudioManager audioManager = AudioManager.Instance;
+                    if (audioManager != null)
+                    {
+                        audioManager.PlayUIClick();
+                    }
+
                     if (puzzle == null)
                     {
                         return;

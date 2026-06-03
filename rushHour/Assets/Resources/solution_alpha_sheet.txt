@@ -1,55 +1,246 @@
-RUSH HOUR - ALPHA SOLUTION SHEET
-Alpha-only set for current build (4 levels)
+RUSH HOUR - BETA SOLUTION SHEET
+Curated set for current build (5 levels x 4 tiers)
 
 ########################################################################
-ALPHA LEVELS  (Alpha1=Beginner  Alpha2=Intermediate
-                     Alpha3=Advanced   Alpha4=Expert)
+BETA CURATED LEVELS  (Beginner/Intermediate/Advanced/Expert, L01-L05)
 ########################################################################
 
-Alpha1 - Beginner  |  ID: 6061  |  Moves: 2  |  Steps: 4
+Beginner L01  |  ID: 1016  |  Moves: 6  |  Steps: 11
 ------------------------------------------------------------------------
-Board: AAJBBoIoJoLxIoXXLoDDoKxMFFoKoMGGHHHo
+Board: JBBxDDJoLEENAALooNKFFMooKooMGGHHHxoo
 
-Solution  (2 moves, 4 steps):
-  L↓2       X→2
+Solution  (6 moves, 11 steps):
+  Dâ†1      Mâ†“1      Fâ†’2      Lâ†“2      Nâ†‘1
+  Aâ†’4
 
 
-Alpha2 - Intermediate  |  ID: 3519  |  Moves: 11  |  Steps: 19
+Beginner L02  |  ID: 1365  |  Moves: 5  |  Steps: 8
 ------------------------------------------------------------------------
-Board: xBBIoooooIKLXXoJKLGCCJoMGoHDDMEEHFFF
+Board: BBCCoxKooMEEKAAMoNKFFGGNooLoHHIILJJJ
 
-Solution  (11 moves, 19 steps):
-  X→1       G↑3       X←1       C←1       H↑2
-  D←3       H↓1       J↓1       K↑1       L↑1
-  X→4
+Solution  (5 moves, 8 steps):
+  Câ†’2      Hâ†1      Mâ†‘1      Nâ†“1      Aâ†’3
 
 
-Alpha3 - Advanced  |  ID: 2588  |  Moves: 36  |  Steps: 60
+Beginner L03  |  ID: 2137  |  Moves: 5  |  Steps: 9
 ------------------------------------------------------------------------
-Board: EAAAoJEoFGoJXXFGIJBBBHIooooHCCooxooo
+Board: ooIBBMCCIJoMHAAJLoHoDDLxFFFKLoGGGKoo
 
-Solution  (36 moves, 60 steps):
-  H↓1       B→1       J↓1       A→2       F↑1
-  X→1       E↓4       X←1       B←1       F↓1
-  A←3       G↑1       H↑2       C←3       H↓2
-  B→1       G↓1       A→3       F↑1       X→1
-  E↑4       X←1       C←1       F↓1       A←1
-  I↓2       J↑1       B→2       F↓3       X→1
-  B←1       E↓1       A←2       G↑1       J↓3
-  X→3
+Solution  (5 moves, 9 steps):
+  Lâ†“1      Mâ†“3      Bâ†’1      Jâ†‘1      Aâ†’3
 
 
-Alpha4 - Expert  |  ID: 16930  |  Moves: 43  |  Steps: 77
+Beginner L04  |  ID: 6190  |  Moves: 5  |  Steps: 10
 ------------------------------------------------------------------------
-Board: GoAAALGBBIKLXXHIKoCCHJKooooJDDoEEFFo
+Board: ooIBBMCCIJLMHAAJLoHoDDxoFFFKooGGoKoo
 
-Solution  (43 moves, 77 steps):
-  A←1       E←1       F→1       H↓2       X→1
-  J↓1       K↑1       C→3       G↓3       X←1
-  A←1       B←1       H↑3       E→1       G↓1
-  C←3       H↓1       I↑1       J↑2       D←3
-  J↓2       I↓2       K↓2       L↓3       A→3
-  B→4       H↑2       X→1       C→1       G↑4
-  X←1       C←1       D←1       E←1       H↓3
-  X→1       G↓1       A←3       I↑2       J↑1
-  F←2       K↓1       X→3
+Solution  (5 moves, 10 steps):
+  Lâ†“2      Mâ†“3      Bâ†’1      Jâ†‘1      Aâ†’3
+
+
+Beginner L05  |  ID: 730  |  Moves: 7  |  Steps: 12
+------------------------------------------------------------------------
+Board: ooJBBMCCJKoMIAAKooIDDLEEFFFLoooxHHHo
+
+Solution  (7 moves, 12 steps):
+  Hâ†2      Lâ†“1      Eâ†1      Mâ†“3      Bâ†’1
+  Kâ†‘1      Aâ†’3
+
+
+Intermediate L01  |  ID: 3874  |  Moves: 9  |  Steps: 16
+------------------------------------------------------------------------
+Board: ooooxoCCCJLoAAIJLMooIDDMHEEKooHFFKox
+
+Solution  (9 moves, 16 steps):
+  Jâ†‘1      Lâ†‘1      Mâ†‘2      Dâ†’1      Kâ†‘2
+  Eâ†’3      Iâ†“1      Kâ†“1      Aâ†’4
+
+
+Intermediate L02  |  ID: 2273  |  Moves: 20  |  Steps: 32
+------------------------------------------------------------------------
+Board: ooIBBxooIJLoAAIJLoDDoKEEHFFKoMHGGGoM
+
+Solution  (20 moves, 32 steps):
+  Dâ†’1      Hâ†‘1      Gâ†1      Kâ†“1      Eâ†1
+  Mâ†‘4      Eâ†’1      Kâ†‘1      Gâ†’3      Hâ†“1
+  Dâ†1      Iâ†“1      Bâ†2      Jâ†‘1      Kâ†‘1
+  Fâ†’3      Iâ†“2      Kâ†“1      Lâ†‘1      Aâ†’4
+
+
+Intermediate L03  |  ID: 9542  |  Moves: 7  |  Steps: 15
+------------------------------------------------------------------------
+Board: BBBKxoooJKDDAAJKoMIEEFFMIoGGLoHHooLo
+
+Solution  (7 moves, 15 steps):
+  Gâ†1      Mâ†“2      Fâ†’1      Kâ†“3      Bâ†’3
+  Jâ†‘1      Aâ†’4
+
+
+Intermediate L04  |  ID: 860  |  Moves: 21  |  Steps: 34
+------------------------------------------------------------------------
+Board: GBBJKoGoHJKxAAHJoLDDEEoLooIoooooIFFF
+
+Solution  (21 moves, 34 steps):
+  Kâ†“1      Lâ†‘2      Eâ†’2      Dâ†’1      Jâ†“1
+  Bâ†’2      Hâ†‘1      Aâ†’1      Gâ†“3      Aâ†1
+  Hâ†“1      Bâ†3      Hâ†‘1      Aâ†’1      Gâ†‘2
+  Dâ†1      Iâ†‘1      Fâ†3      Jâ†“2      Kâ†‘1
+  Aâ†’3
+
+
+Intermediate L05  |  ID: 8016  |  Moves: 15  |  Steps: 26
+------------------------------------------------------------------------
+Board: oooxLoHCCKLoHAAKLoDDJooooIJEEooIFFGG
+
+Solution  (15 moves, 26 steps):
+  Hâ†‘1      Aâ†1      Jâ†‘1      Eâ†1      Kâ†“1
+  Lâ†“2      Câ†’3      Jâ†‘2      Kâ†‘2      Dâ†’2
+  Iâ†‘1      Fâ†2      Gâ†2      Lâ†“1      Aâ†’4
+
+
+Advanced L01  |  ID: 2882  |  Moves: 41  |  Steps: 71
+------------------------------------------------------------------------
+Board: BBCCCoIooKDDIAAKoLooJEELFFJooMGGJHHM
+
+Solution  (41 moves, 71 steps):
+  Câ†’1      Bâ†’1      Iâ†‘1      Aâ†1      Jâ†‘2
+  Fâ†’3      Jâ†“2      Aâ†’1      Iâ†“3      Aâ†1
+  Bâ†1      Jâ†‘3      Gâ†’1      Iâ†“1      Eâ†3
+  Jâ†“2      Kâ†“1      Dâ†4      Jâ†‘2      Kâ†‘1
+  Lâ†‘1      Eâ†’4      Iâ†‘1      Gâ†1      Jâ†“3
+  Aâ†’1      Bâ†’1      Kâ†“1      Dâ†’3      Iâ†‘3
+  Aâ†1      Jâ†‘2      Fâ†3      Jâ†“2      Aâ†’1
+  Iâ†“1      Bâ†1      Câ†1      Kâ†“1      Lâ†‘1
+  Aâ†’3
+
+
+Advanced L02  |  ID: 594  |  Moves: 41  |  Steps: 57
+------------------------------------------------------------------------
+Board: BBHCCoGoHoJoGAAoJoGDDDJooooIooEEoIFF
+
+Solution  (41 moves, 57 steps):
+  Eâ†’1      Gâ†“2      Aâ†1      Hâ†“1      Câ†1
+  Jâ†‘1      Dâ†’2      Hâ†“2      Aâ†’1      Gâ†‘1
+  Eâ†1      Hâ†“1      Dâ†2      Jâ†“1      Câ†’1
+  Bâ†’1      Gâ†‘2      Dâ†1      Iâ†‘3      Dâ†’1
+  Gâ†“1      Bâ†1      Câ†1      Jâ†‘1      Dâ†’2
+  Hâ†‘1      Eâ†’1      Gâ†“2      Aâ†1      Hâ†‘2
+  Dâ†2      Jâ†“1      Câ†’2      Hâ†‘1      Aâ†’1
+  Gâ†‘1      Eâ†1      Fâ†2      Iâ†‘1      Jâ†“2
+  Aâ†’3
+
+
+Advanced L03  |  ID: 1544  |  Moves: 30  |  Steps: 50
+------------------------------------------------------------------------
+Board: oBBBCCoDDxoMAAJooMIoJFFNIGGKLNHHHKLN
+
+Solution  (30 moves, 50 steps):
+  Dâ†1      Jâ†‘1      Fâ†2      Kâ†‘3      Lâ†‘3
+  Fâ†’2      Gâ†’2      Jâ†“2      Aâ†’1      Dâ†’1
+  Iâ†‘3      Aâ†1      Jâ†‘1      Gâ†3      Jâ†“1
+  Aâ†’1      Iâ†“1      Bâ†1      Câ†1      Mâ†‘1
+  Nâ†‘1      Hâ†’3      Jâ†“1      Fâ†3      Jâ†‘1
+  Hâ†1      Kâ†“2      Lâ†“2      Nâ†“1      Aâ†’3
+
+
+Advanced L04  |  ID: 1090  |  Moves: 42  |  Steps: 59
+------------------------------------------------------------------------
+Board: BBICCoHoIoKoHAAoKoHDDDKooooJEEFFoJGG
+
+Solution  (42 moves, 59 steps):
+  Fâ†’1      Hâ†“2      Aâ†1      Iâ†“1      Câ†1
+  Kâ†‘1      Dâ†’2      Iâ†“2      Aâ†’1      Hâ†‘1
+  Fâ†1      Iâ†“1      Dâ†2      Kâ†“1      Câ†’1
+  Bâ†’1      Hâ†‘2      Dâ†1      Jâ†‘3      Dâ†’1
+  Hâ†“1      Bâ†1      Câ†1      Kâ†‘1      Dâ†’2
+  Iâ†‘1      Fâ†’1      Hâ†“2      Aâ†1      Iâ†‘2
+  Dâ†2      Eâ†2      Kâ†“1      Câ†’2      Iâ†‘1
+  Aâ†’1      Hâ†‘1      Fâ†1      Gâ†2      Jâ†‘1
+  Kâ†“2      Aâ†’3
+
+
+Advanced L05  |  ID: 24250  |  Moves: 23  |  Steps: 42
+------------------------------------------------------------------------
+Board: xoCCCMDDJoLMAAJoLNoIEELNHIoKFFHGGKoo
+
+Solution  (23 moves, 42 steps):
+  Câ†1      Hâ†‘1      Gâ†1      Lâ†‘1      Eâ†’1
+  Jâ†“3      Aâ†’2      Dâ†’2      Eâ†1      Hâ†‘3
+  Lâ†“1      Câ†’1      Iâ†‘3      Aâ†2      Eâ†2
+  Jâ†‘2      Kâ†‘2      Fâ†4      Jâ†“1      Kâ†“1
+  Lâ†“2      Nâ†“1      Aâ†’4
+
+
+Expert L01  |  ID: 1680  |  Moves: 40  |  Steps: 77
+------------------------------------------------------------------------
+Board: FoooooFBBBJoAAGHJoCCGHJooooIDDoEEIoo
+
+Solution  (40 moves, 77 steps):
+  Eâ†1      Gâ†“2      Aâ†’1      Câ†’1      Fâ†“2
+  Bâ†1      Hâ†‘2      Jâ†‘1      Câ†’3      Gâ†‘1
+  Iâ†‘1      Eâ†’4      Fâ†“2      Aâ†1      Gâ†“1
+  Iâ†“1      Câ†4      Gâ†‘2      Iâ†‘2      Dâ†3
+  Eâ†3      Iâ†“2      Hâ†“2      Jâ†“3      Bâ†’3
+  Gâ†‘2      Aâ†’1      Câ†’1      Fâ†‘4      Aâ†1
+  Câ†1      Dâ†1      Eâ†1      Gâ†“4      Aâ†’1
+  Câ†’1      Fâ†“2      Bâ†3      Hâ†‘2      Aâ†’3
+
+
+Expert L02  |  ID: 7598  |  Moves: 39  |  Steps: 70
+------------------------------------------------------------------------
+Board: oooKBBHIoKLMHIAALMHCCDDMooJEEoFFJGGo
+
+Solution  (39 moves, 70 steps):
+  Eâ†’1      Gâ†’1      Hâ†‘1      Câ†1      Iâ†‘1
+  Aâ†1      Kâ†“1      Bâ†2      Lâ†‘1      Mâ†‘1
+  Dâ†’1      Kâ†“3      Aâ†’2      Jâ†‘3      Câ†’2
+  Fâ†’1      Hâ†“3      Iâ†“3      Bâ†2      Jâ†‘1
+  Aâ†3      Jâ†“1      Lâ†“1      Bâ†’3      Jâ†‘1
+  Aâ†’2      Hâ†‘3      Iâ†‘3      Aâ†1      Câ†2
+  Kâ†‘3      Dâ†2      Eâ†2      Gâ†1      Lâ†“2
+  Mâ†“3      Bâ†’1      Kâ†‘1      Aâ†’3
+
+
+Expert L03  |  ID: 6377  |  Moves: 28  |  Steps: 47
+------------------------------------------------------------------------
+Board: BBBJoooooJLMAAoKLMHCCKxNHoIEENFFIoxo
+
+Solution  (28 moves, 47 steps):
+  Mâ†‘1      Nâ†‘1      Eâ†’1      Kâ†“2      Câ†’2
+  Iâ†‘3      Câ†2      Kâ†‘2      Eâ†3      Kâ†“1
+  Jâ†“1      Lâ†“2      Nâ†“1      Mâ†“1      Bâ†’3
+  Iâ†‘1      Aâ†’1      Hâ†‘3      Aâ†1      Câ†1
+  Eâ†1      Iâ†“3      Aâ†’1      Hâ†“1      Bâ†3
+  Jâ†‘1      Mâ†‘1      Aâ†’3
+
+
+Expert L04  |  ID: 4687  |  Moves: 38  |  Steps: 70
+------------------------------------------------------------------------
+Board: oooIBBooHICCAAHJKMDDoJKMGEEELNGFFFLN
+
+Solution  (38 moves, 70 steps):
+  Dâ†’1      Hâ†‘1      Aâ†’1      Gâ†‘4      Aâ†1
+  Dâ†1      Eâ†1      Fâ†1      Hâ†“2      Jâ†“2
+  Iâ†“2      Bâ†3      Câ†3      Iâ†‘2      Jâ†‘2
+  Kâ†‘2      Lâ†‘2      Mâ†‘2      Nâ†‘2      Eâ†’3
+  Fâ†’3      Hâ†“2      Aâ†’1      Dâ†’1      Gâ†“4
+  Aâ†1      Bâ†1      Câ†1      Dâ†1      Hâ†‘4
+  Aâ†’1      Dâ†’1      Gâ†‘2      Eâ†3      Jâ†“1
+  Lâ†“1      Nâ†“1      Aâ†’3
+
+
+Expert L05  |  ID: 28276  |  Moves: 39  |  Steps: 70
+------------------------------------------------------------------------
+Board: oBBBKMCCoIKMAAoILoGDDJLoGoHJEEFFHooo
+
+Solution  (39 moves, 70 steps):
+  Aâ†’1      Bâ†1      Câ†’1      Gâ†‘2      Dâ†1
+  Hâ†‘1      Fâ†’3      Hâ†“1      Dâ†’1      Gâ†“3
+  Aâ†1      Dâ†1      Hâ†‘2      Fâ†2      Iâ†‘1
+  Jâ†‘1      Eâ†3      Jâ†“2      Iâ†“2      Lâ†“2
+  Kâ†“2      Câ†’2      Mâ†“3      Bâ†’3      Hâ†‘2
+  Aâ†’1      Dâ†’1      Gâ†‘4      Aâ†1      Dâ†1
+  Eâ†1      Hâ†“3      Aâ†’1      Câ†2      Gâ†“1
+  Bâ†3      Iâ†‘2      Kâ†‘2      Aâ†’3
+
+

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.UI;
 
 public class PuzzleController : MonoBehaviour
 {
@@ -53,6 +54,35 @@ public class PuzzleController : MonoBehaviour
     [Header("Menu")]
     public GameObject mainMenuPanel;
     public GameObject gameplayUi;
+
+    [Header("Settings and Help")]
+    public GameObject settingsPanel;
+    public Slider musicVolumeSlider;
+    public Slider sfxVolumeSlider;
+    public Slider uiVolumeSlider;
+    public GameObject rulesControlsPanel;
+    public TMP_Text rulesControlsText;
+    [TextArea(5, 20)]
+    public string defaultRulesControlsText =
+        "Goal: Time to get out of a TotallyNotRushHour traffic jam! Maneuver the cars inside this traffic jam with the goal of getting the red car to the marked exit on the upper-middle right-hand side in as few moves as possible!\n" +
+        "\n" +
+        "Controls:\n" +
+        "- Click a car to select it, after selected -> available moves are highlighted\n" +
+        "- Click + drag selected car to move it\n" +
+        "- Arrow keys can also move your selected car\n" +
+        "- R resets the level (same as reset button)\n" +
+        "- Tab toggles solution overlay, which shows step-by-step moves from the puzzle level start (fewest possible moves/best solution is shown)\n" +
+        "- F1 toggles the rules panel\n" +
+        "- F2 toggles the settings panel\n" +
+        "\n"
+        + "Enjoy!";
+    [SerializeField] private KeyCode toggleRulesControlsKey = KeyCode.F1;
+    [SerializeField] private KeyCode toggleSettingsKey = KeyCode.F2;
+
+    [Header("Audio")]
+    [SerializeField] private bool playMusicInMenu = true;
+
+    private bool suppressVolumeSliderCallbacks = false;
 
     private bool gameWon = false;
 
@@ -141,19 +171,39 @@ public class PuzzleController : MonoBehaviour
 
         mainMenuPanel.SetActive(true);
         gameplayUi.SetActive(false);
+        InitializeUiPanels();
+        InitializeAudioSettingsUi();
 
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
         {
-            audioManager.PlayMusicLoop();
+            if (playMusicInMenu)
+            {
+                audioManager.PlayMenuMusicLoopWithFade();
+            }
+            else
+            {
+                audioManager.StopMusic();
+            }
         }
     }
 
     public void StartGame()
     {
+        PlayUiClick();
+
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
         isGameplayActive = true;
+
+        SetPanelActive(settingsPanel, false);
+        SetPanelActive(rulesControlsPanel, false);
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayGameplayMusicLoopWithFade();
+        }
 
         if (!boardGenerated)
         {
@@ -181,6 +231,16 @@ public class PuzzleController : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(toggleSettingsKey))
+        {
+            ToggleSettingsPanel();
+        }
+
+        if (Input.GetKeyDown(toggleRulesControlsKey))
+        {
+            ToggleRulesControlsPanel();
+        }
+
         if (isGameplayActive && Input.GetKeyDown(KeyCode.R))
         {
             ResetPuzzle();
@@ -300,6 +360,12 @@ public class PuzzleController : MonoBehaviour
     public void StartGameAtLevel(Diff diff, int levelIndex)
     {
         activeDiff = diff;
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayGameplayMusicLoopWithFade();
+        }
 
         List<string> levelsForDiff;
         if (!lvlDb.TryGetValue(diff, out levelsForDiff) || levelsForDiff.Count == 0)
@@ -891,6 +957,7 @@ public class PuzzleController : MonoBehaviour
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
         {
+            audioManager.FadeMusicTo(0.15f, 0.2f);
             audioManager.PlayWin();
         }
 
@@ -916,7 +983,7 @@ public class PuzzleController : MonoBehaviour
         if (audioManager != null)
         {
             audioManager.PlayReset();
-            audioManager.PlayMusicLoop();
+            audioManager.PlayGameplayMusicLoopWithFade();
         }
 
         if (winText != null)
@@ -1115,10 +1182,26 @@ public class PuzzleController : MonoBehaviour
 
     public void ReturnToMenu()
     {
+        PlayUiClick();
+
         isGameplayActive = false;
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            if (playMusicInMenu)
+            {
+                audioManager.PlayMenuMusicLoopWithFade();
+            }
+            else
+            {
+                audioManager.StopMusicWithFade();
+            }
+        }
         
         mainMenuPanel.SetActive(true);
         gameplayUi.SetActive(false);
+        SetPanelActive(settingsPanel, false);
 
         ClearMoveHighlights();
         ClearLiveCars();
@@ -1147,6 +1230,169 @@ public class PuzzleController : MonoBehaviour
         if(environmentManager!=null)
         {
             environmentManager.HideEnvironment();
+        }
+    }
+
+    void InitializeUiPanels()
+    {
+        SetPanelActive(settingsPanel, false);
+        SetPanelActive(rulesControlsPanel, false);
+
+        if (rulesControlsText != null && string.IsNullOrWhiteSpace(rulesControlsText.text))
+        {
+            rulesControlsText.text = defaultRulesControlsText;
+        }
+    }
+
+    void InitializeAudioSettingsUi()
+    {
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager == null)
+        {
+            return;
+        }
+
+        suppressVolumeSliderCallbacks = true;
+
+        if (musicVolumeSlider != null)
+        {
+            musicVolumeSlider.value = audioManager.MusicVolume;
+            musicVolumeSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
+            musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+        }
+
+        if (sfxVolumeSlider != null)
+        {
+            sfxVolumeSlider.value = audioManager.SfxVolume;
+            sfxVolumeSlider.onValueChanged.RemoveListener(OnSfxVolumeChanged);
+            sfxVolumeSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
+        }
+
+        if (uiVolumeSlider != null)
+        {
+            uiVolumeSlider.value = audioManager.UiVolume;
+            uiVolumeSlider.onValueChanged.RemoveListener(OnUiVolumeChanged);
+            uiVolumeSlider.onValueChanged.AddListener(OnUiVolumeChanged);
+        }
+
+        suppressVolumeSliderCallbacks = false;
+    }
+
+    public void OpenSettingsPanel()
+    {
+        PlayUiClick();
+        SetPanelActive(settingsPanel, true);
+        InitializeAudioSettingsUi();
+    }
+
+    public void ToggleSettingsPanel()
+    {
+        if (settingsPanel == null)
+        {
+            return;
+        }
+
+        if (settingsPanel.activeSelf)
+        {
+            CloseSettingsPanel();
+            return;
+        }
+
+        OpenSettingsPanel();
+    }
+
+    public void CloseSettingsPanel()
+    {
+        PlayUiClick();
+        SetPanelActive(settingsPanel, false);
+    }
+
+    public void ToggleRulesControlsPanel()
+    {
+        if (rulesControlsPanel == null)
+        {
+            return;
+        }
+
+        bool show = !rulesControlsPanel.activeSelf;
+        SetPanelActive(rulesControlsPanel, show);
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayUIClick();
+        }
+    }
+
+    public void OpenRulesControlsPanel()
+    {
+        PlayUiClick();
+        SetPanelActive(rulesControlsPanel, true);
+    }
+
+    public void CloseRulesControlsPanel()
+    {
+        PlayUiClick();
+        SetPanelActive(rulesControlsPanel, false);
+    }
+
+    public void OnMusicVolumeChanged(float value)
+    {
+        if (suppressVolumeSliderCallbacks)
+        {
+            return;
+        }
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.SetMusicVolume(value);
+        }
+    }
+
+    public void OnSfxVolumeChanged(float value)
+    {
+        if (suppressVolumeSliderCallbacks)
+        {
+            return;
+        }
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.SetSfxVolume(value);
+        }
+    }
+
+    public void OnUiVolumeChanged(float value)
+    {
+        if (suppressVolumeSliderCallbacks)
+        {
+            return;
+        }
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.SetUiVolume(value);
+            audioManager.PlayUIClick();
+        }
+    }
+
+    void SetPanelActive(GameObject panel, bool active)
+    {
+        if (panel != null)
+        {
+            panel.SetActive(active);
+        }
+    }
+
+    void PlayUiClick()
+    {
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayUIClick();
         }
     }
 

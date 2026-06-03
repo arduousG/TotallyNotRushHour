@@ -22,16 +22,11 @@ Guide the red target car to the exit by sliding other vehicles out of the way
 	- UI button click SFX
 
 ## Controls
-- Left Mouse Click: Select a car
+- Left Mouse Click: Select a car (available moves are highlighted)
 	- Hold click and drag movement also available
 - Arrow Keys: Move selected car (if move is valid)
 - R: Reset puzzle
 - Reset UI Button: Reset puzzle via UI
 - Tab: Toggle Solution Card Overlay
-- 1,2,3,4: Level select -- *debug keys*
-
-## Current: Alpha Build
-- Tagged as `alpha`
-- Commit includes Unity WebGL build output and required assets/settings
-
-- ADDED: Select + valid move highlighting, menu + level select options, as well as solution card overlay (*currently broken in WebGL build however*)
+- F1: toggles controls/rules 
+- F2: toggles settings 

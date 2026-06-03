@@ -74,12 +74,24 @@ public class SolutionCardOverlay : MonoBehaviour
         public SolvedLevelRecord[] items;
     }
 
-    void Start()
+    bool EnsurePuzzleReference(bool logIfMissing)
     {
         if (puzzle == null)
         {
             puzzle = UnityEngine.Object.FindFirstObjectByType<PuzzleController>();
         }
+
+        if (puzzle == null && logIfMissing)
+        {
+            Debug.LogWarning("SolutionCardOverlay could not find PuzzleController.");
+        }
+
+        return puzzle != null;
+    }
+
+    void Start()
+    {
+        EnsurePuzzleReference(logIfMissing: true);
 
         LoadSolutionSheet();
         CreateUi();
@@ -97,13 +109,7 @@ public class SolutionCardOverlay : MonoBehaviour
     {
         if (IsTogglePressed(toggleKey))
         {
-            isVisible = !isVisible;
-            root.SetActive(isVisible);
-
-            if (isVisible)
-            {
-                RefreshCard();
-            }
+            ToggleOverlay();
         }
 
         if (!isVisible)
@@ -129,6 +135,46 @@ public class SolutionCardOverlay : MonoBehaviour
     bool IsTogglePressed(KeyCode keyCode)
     {
         return Input.GetKeyDown(keyCode);
+    }
+
+    public void ToggleOverlay()
+    {
+        isVisible = !isVisible;
+        if (root != null)
+        {
+            root.SetActive(isVisible);
+        }
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayUIClick();
+        }
+
+        if (isVisible)
+        {
+            RefreshCard();
+        }
+    }
+
+    public void ShowOverlay()
+    {
+        if (isVisible)
+        {
+            return;
+        }
+
+        ToggleOverlay();
+    }
+
+    public void HideOverlay()
+    {
+        if (!isVisible)
+        {
+            return;
+        }
+
+        ToggleOverlay();
     }
 
     void LoadSolutionSheet()
@@ -179,7 +225,17 @@ public class SolutionCardOverlay : MonoBehaviour
 
         // JsonUtility cannot deserialize a raw array, so we wrap it.
         string wrapped = "{\"items\":" + json + "}";
-        SolvedLevelRecordList parsed = JsonUtility.FromJson<SolvedLevelRecordList>(wrapped);
+        SolvedLevelRecordList parsed = null;
+        try
+        {
+            parsed = JsonUtility.FromJson<SolvedLevelRecordList>(wrapped);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("Failed to parse solved levels json: " + ex.Message);
+            return false;
+        }
+
         if (parsed == null || parsed.items == null || parsed.items.Length == 0)
         {
             return false;
@@ -298,6 +354,11 @@ public class SolutionCardOverlay : MonoBehaviour
             return true;
         }
 
+#if UNITY_WEBGL
+        // Resources/TextAsset is only supported path here.
+        return false;
+#else
+
         // allow file near project root from either Assets depth (Editor/Standalone convenience)
         string[] probePaths = new string[]
         {
@@ -323,6 +384,7 @@ public class SolutionCardOverlay : MonoBehaviour
         lines = File.ReadAllLines(path);
         source = path;
         return true;
+#endif
     }
 
     string[] SplitLines(string content)

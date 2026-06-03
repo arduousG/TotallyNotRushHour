@@ -111,7 +111,6 @@ public class CarController : MonoBehaviour
         puzzle.SetCarPosition(this, gridPosition, newOrigin);
 
         gridPosition = newOrigin;
-        puzzle.RegisterMove();
         transform.position = GridToWorld(gridPosition);
 
         // Check first so win sound is not competing with successful move SFX
@@ -120,6 +119,8 @@ public class CarController : MonoBehaviour
         {
             return;
         }
+
+        puzzle.RegisterMove(); // so move counter matches with steps taken in soution overlay card
 
         AudioManager moveSuccessAudioManager = AudioManager.Instance;
         if (moveSuccessAudioManager != null)
