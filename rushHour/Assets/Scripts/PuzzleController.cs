@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class PuzzleController : MonoBehaviour
 {
     public event Action<Diff, int, bool> LevelCompletionChanged;
+    public event Action<PuzzleCompletionResult> PuzzleCompleted;
 
     public enum Diff
     {
@@ -44,6 +45,7 @@ public class PuzzleController : MonoBehaviour
     public bool useDynLvls = true;
     public Diff activeDiff = Diff.Beginner;
     public int activeLvlIdx = 0;
+    public EndlessModeController endlessModeController;
 
     [Header("Valid Move Highlight")]
     //toggle legal move tile tinting/highlighting
@@ -87,9 +89,11 @@ public class PuzzleController : MonoBehaviour
     private bool gameWon = false;
 
     private bool isGameplayActive = false;
+    private bool isEndlessMode = false;
     public bool IsGameWon => gameWon;
     private int moveCount = 0;
     public int MoveCount => moveCount;
+    public bool IsEndlessMode => isEndlessMode;
 
     private CarController[,] grid;
     private Dictionary<CarController, Vector2Int> startingPositions = 
@@ -102,6 +106,8 @@ public class PuzzleController : MonoBehaviour
     private string currentBoardString = "";
     private string currentLevelId = "";
     private int currentSourceScore = -1;
+    private int currentMinimumMoves = -1;
+    private float levelStartTime;
     //board tile renderers indexed by board coordinates for direct tinting of grid for highlights
     private Renderer[,] boardTileRenderers;
     //tracks currently tinted tiles for qucik reset
@@ -135,6 +141,16 @@ public class PuzzleController : MonoBehaviour
         get { return currentSourceScore; }
     }
 
+    public int CurrentMinimumMoves
+    {
+        get { return currentMinimumMoves; }
+    }
+
+    public float CurrentElapsedTime
+    {
+        get { return Mathf.Max(0f, Time.time - levelStartTime); }
+    }
+
     public bool GetCarColorById(int carId, out Color32 color) //solution overlay will know colors for grid -- exposing this method rather than just dict
     {
         if (carColorById.ContainsKey(carId))
@@ -159,6 +175,19 @@ public class PuzzleController : MonoBehaviour
         public Vector2Int gridPosition;
     }
 
+    public class PuzzleCompletionResult
+    {
+        public Diff diff;
+        public int levelIndex;
+        public string levelId;
+        public string board;
+        public int sourceScore;
+        public int minimumMoves;
+        public int movesUsed;
+        public float elapsedSeconds;
+        public bool endlessMode;
+    }
+
     //init reusable property block @ runtime for tile highlight updates
     void Awake()
     {
@@ -173,6 +202,7 @@ public class PuzzleController : MonoBehaviour
         gameplayUi.SetActive(false);
         InitializeUiPanels();
         InitializeAudioSettingsUi();
+        EnsureEndlessModeController();
 
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
@@ -191,6 +221,7 @@ public class PuzzleController : MonoBehaviour
     public void StartGame()
     {
         PlayUiClick();
+        isEndlessMode = false;
 
         mainMenuPanel.SetActive(false);
         gameplayUi.SetActive(true);
@@ -359,6 +390,7 @@ public class PuzzleController : MonoBehaviour
 
     public void StartGameAtLevel(Diff diff, int levelIndex)
     {
+        isEndlessMode = false;
         activeDiff = diff;
 
         AudioManager audioManager = AudioManager.Instance;
@@ -412,8 +444,40 @@ public class PuzzleController : MonoBehaviour
         LoadActiveLvl();
     }
 
+    public void StartEndlessGame()
+    {
+        PlayUiClick();
+        isEndlessMode = true;
+
+        mainMenuPanel.SetActive(false);
+        gameplayUi.SetActive(true);
+        isGameplayActive = true;
+
+        SetPanelActive(settingsPanel, false);
+        SetPanelActive(rulesControlsPanel, false);
+
+        AudioManager audioManager = AudioManager.Instance;
+        if (audioManager != null)
+        {
+            audioManager.PlayGameplayMusicLoopWithFade();
+        }
+
+        EnsureBoardVisible();
+    }
+
+    public void StartEndlessMode()
+    {
+        EnsureEndlessModeController();
+
+        if (endlessModeController != null)
+        {
+            endlessModeController.StartEndlessMode();
+        }
+    }
+
     public void SetDiff(Diff diff)
     {
+        isEndlessMode = false;
         activeDiff = diff;
         activeLvlIdx = 0;
 
@@ -426,6 +490,8 @@ public class PuzzleController : MonoBehaviour
     }
     public void NextLvl()
     {
+        isEndlessMode = false;
+
         if (!lvlDb.ContainsKey(activeDiff))
         {
             return;
@@ -443,20 +509,7 @@ public class PuzzleController : MonoBehaviour
 
     void LoadActiveLvl()
     {
-        gameWon = false;
-        StopWinConfetti();
-        if (winText != null)
-        {
-            winText.SetActive(false);
-        }
-
-        moveCount = 0;
-        UpdateMoveText();
-
-        //new level, clean runtime state before rebuild: clear old spawned cars + selected state first
-        ClearLiveCars();
-        CarController.ClearSel();
-        ClearMoveHighlights();
+        PrepareForLevelLoad();
 
         if (useDynLvls)
         {
@@ -474,6 +527,58 @@ public class PuzzleController : MonoBehaviour
             }
         }
 
+        FinishLevelLoad();
+    }
+
+    public bool LoadEndlessLevel(string board, string levelId, int minimumMoves, int sourceScore, Diff diff, int endlessLevelIndex)
+    {
+        if (string.IsNullOrEmpty(board))
+        {
+            return false;
+        }
+
+        isEndlessMode = true;
+        activeDiff = diff;
+        activeLvlIdx = endlessLevelIndex;
+        currentBoardString = board.Trim();
+        currentLevelId = levelId;
+        currentMinimumMoves = minimumMoves;
+        currentSourceScore = sourceScore;
+
+        PrepareForLevelLoad();
+
+        CarSpawnData[] parsedCars = ParseBoard(currentBoardString);
+        if (parsedCars == null || parsedCars.Length == 0 || !IsValidLvl(parsedCars))
+        {
+            Debug.LogWarning("Endless level data invalid: " + levelId);
+            return false;
+        }
+
+        cars = parsedCars;
+        FinishLevelLoad();
+        return true;
+    }
+
+    void PrepareForLevelLoad()
+    {
+        gameWon = false;
+        StopWinConfetti();
+        if (winText != null)
+        {
+            winText.SetActive(false);
+        }
+
+        moveCount = 0;
+        UpdateMoveText();
+
+        //new level, clean runtime state before rebuild: clear old spawned cars + selected state first
+        ClearLiveCars();
+        CarController.ClearSel();
+        ClearMoveHighlights();
+    }
+
+    void FinishLevelLoad()
+    {
         EnforceMainCarExitRow();
 
         if (!IsValidLvl(cars))
@@ -488,6 +593,7 @@ public class PuzzleController : MonoBehaviour
         startingPositions = new Dictionary<CarController, Vector2Int>();
         SpawnCars();
         UpdateMoveHighlight();
+        levelStartTime = Time.time;
     }
 
     bool IsValidLvl(CarSpawnData[] inCars)
@@ -640,6 +746,7 @@ public class PuzzleController : MonoBehaviour
         int.TryParse(parts[0], out parsedScore);
 
         currentSourceScore = parsedScore; //what overlay is reading for score, L45
+        currentMinimumMoves = -1;
         // overlay matching keys come from these 2 vals
         currentBoardString = parts[1].Trim();
         currentLevelId = parts[2].Trim();
@@ -950,7 +1057,10 @@ public class PuzzleController : MonoBehaviour
             return;
 
         gameWon = true;
-        MarkCurrentLevelCompleted();
+        if (!isEndlessMode)
+        {
+            MarkCurrentLevelCompleted();
+        }
 
         Debug.Log("PUZZLE COMPLETE IN " + moveCount + " MOVES!");
 
@@ -965,6 +1075,22 @@ public class PuzzleController : MonoBehaviour
             winText.SetActive(true);
 
         PlayWinConfetti();
+
+        Action<PuzzleCompletionResult> callback = PuzzleCompleted;
+        if (callback != null)
+        {
+            PuzzleCompletionResult result = new PuzzleCompletionResult();
+            result.diff = activeDiff;
+            result.levelIndex = activeLvlIdx;
+            result.levelId = currentLevelId;
+            result.board = currentBoardString;
+            result.sourceScore = currentSourceScore;
+            result.minimumMoves = currentMinimumMoves;
+            result.movesUsed = moveCount;
+            result.elapsedSeconds = CurrentElapsedTime;
+            result.endlessMode = isEndlessMode;
+            callback(result);
+        }
     }
 
     public void ResetPuzzle()
@@ -1185,6 +1311,7 @@ public class PuzzleController : MonoBehaviour
         PlayUiClick();
 
         isGameplayActive = false;
+        isEndlessMode = false;
 
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
@@ -1420,6 +1547,50 @@ public class PuzzleController : MonoBehaviour
         }
 
         return levels.Count;
+    }
+
+    void EnsureBoardVisible()
+    {
+        if (!boardGenerated)
+        {
+            GenerateBoard();
+            SpawnExit();
+            boardGenerated = true;
+            return;
+        }
+
+        foreach (GameObject tile in boardTiles)
+        {
+            if (tile != null)
+            {
+                tile.SetActive(true);
+            }
+        }
+
+        if (exitObject != null)
+        {
+            exitObject.SetActive(true);
+        }
+    }
+
+    void EnsureEndlessModeController()
+    {
+        if (endlessModeController == null)
+        {
+            endlessModeController = UnityEngine.Object.FindFirstObjectByType<EndlessModeController>();
+        }
+
+        if (endlessModeController == null)
+        {
+            endlessModeController = gameObject.AddComponent<EndlessModeController>();
+        }
+
+        endlessModeController.puzzle = this;
+
+        if (endlessModeController.environmentManager == null)
+        {
+            endlessModeController.environmentManager = environmentManager;
+        }
     }
 
     void MarkCurrentLevelCompleted()
