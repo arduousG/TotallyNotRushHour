@@ -2014,6 +2014,7 @@ MonoBehaviour:
   highlightColor: {r: 0.2, g: 0.85, b: 1, a: 0.5}
   mainMenuPanel: {fileID: 1695939974}
   gameplayUi: {fileID: 1676718248}
+  mainMenuBackgroundColor: {r: 0.06, g: 0.075, b: 0.09, a: 0.96}
   settingsPanel: {fileID: 171343128}
   musicVolumeSlider: {fileID: 2093565089}
   sfxVolumeSlider: {fileID: 1360931538}
@@ -2900,7 +2901,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Return Home
+  m_text: Home
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3926,13 +3927,14 @@ MonoBehaviour:
   advancedEnvironment: {fileID: 5576360499719655820, guid: ca0e4fa92b6a54ed09a14ea3b5abc67e, type: 3}
   expertEnvironment: {fileID: 2690329019356924053, guid: 9566e499820e3427d90940b22f4d9aa9, type: 3}
   endlessSkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
-  sunLight: {fileID: 418214407}
+  useRuntimeEndlessSun: 1
+  sunLightTemplate: {fileID: 418214407}
   endlessTimeOfDay: 0.3
   ambientIntensity: 0.85
   ambientSkyGradient:
     serializedVersion: 2
     key0: {r: 0.9811321, g: 0.9811321, b: 0.9811321, a: 1}
-    key1: {r: 0, g: 0.050427433, b: 0.3301887, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 1}
     key2: {r: 0, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
@@ -3990,7 +3992,13 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   animateEndlessTime: 1
+  updateGlobalSkyDuringRealtimeAnimation: 0
+  clampEndlessLightingColors: 1
   realtimeDayLengthSeconds: 240
+  dynamicGiRefreshInterval: 1
+  maxGradientColorChannel: 1
+  maxSunIntensity: 1.15
+  maxSkyExposure: 1.15
 --- !u!4 &912831025
 Transform:
   m_ObjectHideFlags: 0
