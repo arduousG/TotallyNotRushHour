@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class CarController : MonoBehaviour
 {
@@ -131,6 +132,11 @@ public class CarController : MonoBehaviour
 
     void OnMouseDown()
     {
+        if (IsPointerOverUi())
+        {
+            return;
+        }
+
         if (currentlySelected != null)
         {
             currentlySelected.selected = false;
@@ -194,6 +200,11 @@ public class CarController : MonoBehaviour
 
     void OnMouseDrag()
     {
+        if (IsPointerOverUi())
+        {
+            return;
+        }
+
         Vector3 mouseDelta = Input.mousePosition - dragStartMousePos;
 
         if (isHorizontal)
@@ -222,5 +233,26 @@ public class CarController : MonoBehaviour
                 dragStartMousePos = Input.mousePosition;
             }
         }
+    }
+
+    bool IsPointerOverUi()
+    {
+        if (EventSystem.current == null)
+        {
+            return false;
+        }
+
+        if (Input.touchCount > 0)
+        {
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return EventSystem.current.IsPointerOverGameObject();
     }
 }
