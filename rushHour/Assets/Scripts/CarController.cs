@@ -114,7 +114,8 @@ public class CarController : MonoBehaviour
         gridPosition = newOrigin;
         transform.position = GridToWorld(gridPosition);
 
-        puzzle.RegisterMove(this, direction); // group repeated steps on one car/direction as one solution-style move
+        // Group repeated tile steps on one car/direction as one solution-style move.
+        puzzle.RegisterMove(this, direction);
 
         puzzle.CheckWin(this);
         if (puzzle.IsGameWon)

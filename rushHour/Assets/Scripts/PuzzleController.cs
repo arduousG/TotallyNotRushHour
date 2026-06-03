@@ -8,6 +8,7 @@ public class PuzzleController : MonoBehaviour
 {
     public event Action<Diff, int, bool> LevelCompletionChanged;
     public event Action<PuzzleCompletionResult> PuzzleCompleted;
+    // Fired after spawned cars rebuild the runtime color map used by UI overlays.
     public event Action LevelLoaded;
 
     public enum Diff
@@ -96,6 +97,7 @@ public class PuzzleController : MonoBehaviour
     private int moveCount = 0;
     public int MoveCount => moveCount;
     public bool IsEndlessMode => isEndlessMode;
+    // Tracks the last grouped move so A->3 counts as one move, not three tile steps.
     private CarController lastScoredMoveCar;
     private Vector2Int lastScoredMoveDirection;
 
@@ -538,6 +540,7 @@ public class PuzzleController : MonoBehaviour
 
     public bool LoadEndlessLevel(string board, string levelId, int minimumMoves, int sourceScore, Diff diff, int endlessLevelIndex)
     {
+        // Endless mode supplies board data directly from solved level records.
         if (string.IsNullOrEmpty(board))
         {
             return false;
@@ -1315,6 +1318,7 @@ public class PuzzleController : MonoBehaviour
 
     public void RegisterMove(CarController car, Vector2Int direction)
     {
+        // Solver move counts are grouped by car and direction, so keep player scoring aligned.
         if (car == null)
         {
             return;
@@ -1633,6 +1637,7 @@ public class PuzzleController : MonoBehaviour
 
     void EnsureMainMenuBackground()
     {
+        // Screen-space UI background keeps the menu independent from scene lighting changes.
         if (mainMenuPanel == null)
         {
             return;

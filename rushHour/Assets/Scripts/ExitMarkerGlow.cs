@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// Adds a small emissive tint so the exit marker stays visible in changing lighting.
 public class ExitMarkerGlow : MonoBehaviour
 {
     public Color glowColor = new Color(0.75f, 0.12f, 0.08f, 1f);
@@ -20,6 +21,7 @@ public class ExitMarkerGlow : MonoBehaviour
 
     public void ApplyGlow()
     {
+        // Use material instances for emission and property blocks for base color overrides.
         if (propertyBlock == null)
         {
             propertyBlock = new MaterialPropertyBlock();

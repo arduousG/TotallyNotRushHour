@@ -146,6 +146,7 @@ public class SolutionCardOverlay : MonoBehaviour
 
     void OnPuzzleLevelLoaded()
     {
+        // Force a repaint after car colors are regenerated for the newly loaded board.
         lastShownId = "";
         lastShownBoard = "";
 
@@ -935,6 +936,7 @@ public class SolutionCardOverlay : MonoBehaviour
 
     int DisplayPieceToCarId(char piece)
     {
+        // Board letters map directly to parser car IDs: A = 0, B = 1, and so on.
         if (piece == 'X')
         {
             return 0;

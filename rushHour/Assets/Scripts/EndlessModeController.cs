@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+// Drives the generated endless-mode run: level selection, scoring, UI, and environment time pushes.
 public class EndlessModeController : MonoBehaviour
 {
     [Header("Refs")]
@@ -128,8 +129,10 @@ public class EndlessModeController : MonoBehaviour
 
     void Update()
     {
+        // Keep the generated menu button in sync with the level-select submenu.
         RefreshStartButtonVisibility();
 
+        // If the puzzle controller exits endless mode, hide/stop endless UI state here.
         if (isRunning && (puzzle == null || !puzzle.IsEndlessMode))
         {
             StopEndlessMode();
@@ -245,6 +248,7 @@ public class EndlessModeController : MonoBehaviour
 
     void LoadNextPuzzle()
     {
+        // Pick a solved board near the current target minimum move count.
         EndlessLevel nextLevel = PickNextLevel();
         if (nextLevel == null)
         {
@@ -283,6 +287,7 @@ public class EndlessModeController : MonoBehaviour
 
     EndlessLevel PickNextLevel()
     {
+        // Difficulty rises by moving the target minimum-move count upward every few puzzles.
         int targetMinimumMoves = startMinimumMoves;
         if (minimumMovesIncreaseEvery > 0)
         {
@@ -320,6 +325,7 @@ public class EndlessModeController : MonoBehaviour
 
     EndlessRank CalculateRank(int movesUsed, int minimumMoves, float elapsedSeconds)
     {
+        // Blend move efficiency and solve time into a DMC-style rank.
         int safeMinimumMoves = Mathf.Max(1, minimumMoves);
         float moveRatio = movesUsed / (float)safeMinimumMoves;
         float parSeconds = Mathf.Max(8f, safeMinimumMoves * parSecondsPerMinimumMove);
@@ -355,6 +361,7 @@ public class EndlessModeController : MonoBehaviour
 
     void LoadLevels()
     {
+        // Resources JSON is a raw array, so it gets wrapped before JsonUtility reads it.
         levels.Clear();
 
         TextAsset jsonAsset = solvedLevelsJsonAsset;
@@ -480,6 +487,7 @@ public class EndlessModeController : MonoBehaviour
 
     void EnsureRuntimeUi()
     {
+        // Runtime fallback UI keeps endless usable even before custom scene UI is built.
         if (statusText != null && scoreboardText != null && resultText != null)
         {
             return;
@@ -542,6 +550,7 @@ public class EndlessModeController : MonoBehaviour
 
     void EnsureStartButton()
     {
+        // Mirror the existing difficulty button styling instead of introducing a separate look.
         if (startButton != null)
         {
             startButton.onClick.RemoveListener(StartEndlessMode);

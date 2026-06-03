@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 
+// Handles biome prefabs for normal levels and isolated sky/lighting for endless mode.
 public class EnvironmentManager : MonoBehaviour
 {
     public GameObject beginnerEnvironment;
@@ -68,6 +69,7 @@ public class EnvironmentManager : MonoBehaviour
 
         endlessTimeOfDay = Mathf.Repeat(endlessTimeOfDay + Time.deltaTime / realtimeDayLengthSeconds, 1f);
 
+        // By default, realtime animation only moves the runtime sun; global sky updates happen on puzzle completion.
         if (updateGlobalSkyDuringRealtimeAnimation)
         {
             ApplyEndlessLighting(false);
@@ -130,6 +132,7 @@ public class EnvironmentManager : MonoBehaviour
     {
         HideEnvironment();
 
+        // Save global lighting before endless changes skybox, ambient, or sun assignments.
         if (!endlessSkyActive)
         {
             SaveRenderSettings();
@@ -175,6 +178,7 @@ public class EnvironmentManager : MonoBehaviour
 
     void ApplyEndlessLighting(bool forceEnvironmentRefresh)
     {
+        // Clamp evaluated gradients so accidental HDR keys do not blow out the scene.
         Color ambientColor = EvaluateEndlessGradient(ambientSkyGradient, endlessTimeOfDay);
 
         RenderSettings.ambientLight = ambientColor * ambientIntensity;
@@ -215,6 +219,7 @@ public class EnvironmentManager : MonoBehaviour
         }
 
         endlessSkyActive = false;
+        // Restore global render state so normal difficulty environments are not tinted by endless.
         RestoreRenderSettings();
         DestroyRuntimeEndlessSun();
         RefreshDynamicGiIfNeeded(true);
@@ -298,6 +303,7 @@ public class EnvironmentManager : MonoBehaviour
             return runtimeEndlessSunLight;
         }
 
+        // Runtime-only sun prevents endless gradients from mutating the scene's regular light.
         GameObject sunObj = new GameObject("EndlessRuntimeSun");
         runtimeEndlessSunLight = sunObj.AddComponent<Light>();
         runtimeEndlessSunLight.type = LightType.Directional;
