@@ -215,6 +215,7 @@ public class PuzzleController : MonoBehaviour
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
         {
+            // Menu can run its own BGM loop while gameplay loop is reserved for puzzle state.
             if (playMusicInMenu)
             {
                 audioManager.PlayMenuMusicLoopWithFade();
@@ -270,6 +271,7 @@ public class PuzzleController : MonoBehaviour
 
     void Update()
     {
+        //global quick toggles so panels can be opened from menu or in-game
         if (Input.GetKeyDown(toggleSettingsKey))
         {
             ToggleSettingsPanel();
@@ -1421,6 +1423,7 @@ public class PuzzleController : MonoBehaviour
             return;
         }
 
+        //prevent slider init values from firing save callbacks
         suppressVolumeSliderCallbacks = true;
 
         if (musicVolumeSlider != null)
@@ -1449,8 +1452,10 @@ public class PuzzleController : MonoBehaviour
 
     public void OpenSettingsPanel()
     {
+        // Open and refresh slider values each time panel is shown.
         PlayUiClick();
         SetPanelActive(settingsPanel, true);
+        //Pull latest values each open in case volume changed elsewhere
         InitializeAudioSettingsUi();
     }
 
@@ -1495,6 +1500,7 @@ public class PuzzleController : MonoBehaviour
 
     public void OpenRulesControlsPanel()
     {
+        // Dedicated open path for menu/in-game Rules button bindings.
         PlayUiClick();
         SetPanelActive(rulesControlsPanel, true);
     }
@@ -1544,6 +1550,7 @@ public class PuzzleController : MonoBehaviour
         if (audioManager != null)
         {
             audioManager.SetUiVolume(value);
+            //UI slider move gives immediate click feedback at the new UI volume -- lowk annoying -- feel free to comment out
             audioManager.PlayUIClick();
         }
     }

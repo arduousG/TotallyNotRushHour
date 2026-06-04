@@ -37,8 +37,11 @@ public class AudioManager : MonoBehaviour
     private const string SfxVolumePrefKey = "rushhour.audio.sfx";
     private const string UiVolumePrefKey = "rushhour.audio.ui";
 
+    //Keeps music transitions smooth when switching menu/game states
     private Coroutine musicFadeRoutine;
+    //Used for WebGL autoplay recovery in case the browser blocks playback until user interaction
     private bool musicRequested;
+    //Stores the last requested track/vol so retry logic can resume correctly
     private AudioClip requestedMusicClip;
     private float requestedMusicVolume;
 
@@ -155,6 +158,7 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMusicLoop()
     {
+        //back-compat wrapper: route old call sites to gameplay loop
         PlayGameplayMusicLoop();
     }
 
@@ -177,21 +181,25 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMusicLoopWithFade(float duration = 0.25f)
     {
+        //back-compat wrapper: route old call sites to gameplay loop + fade
         PlayGameplayMusicLoopWithFade(duration);
     }
 
     public void PlayGameplayMusicLoop()
     {
+        // Use gameplay loop for active puzzle states.
         PlayMusicClip(gameplayMusicLoop, musicVolume);
     }
 
     public void PlayGameplayMusicLoopWithFade(float duration = 0.25f)
     {
+        // Fade-in helper for scene/panel transitions into gameplay.
         PlayMusicClipWithFade(gameplayMusicLoop, musicVolume, duration);
     }
 
     public void PlayMenuMusicLoopWithFade(float duration = 0.25f)
     {
+        //Fallback to gameplay loop if no dedicated menu track is assigned
         AudioClip clip = menuMusicLoop != null ? menuMusicLoop : gameplayMusicLoop;
         PlayMusicClipWithFade(clip, musicVolume, duration);
     }
@@ -216,6 +224,7 @@ public class AudioManager : MonoBehaviour
         if (musicSource == null || clip == null)
             return;
 
+        //cache requested state so WebGL can retry on input if autoplay is blocked
         musicRequested = true;
         requestedMusicClip = clip;
         requestedMusicVolume = Mathf.Clamp01(targetVolume);
@@ -267,6 +276,7 @@ public class AudioManager : MonoBehaviour
         if (musicSource == null)
             return;
 
+        //clear requested track so retry logic does not restart music by mistake
         musicRequested = false;
         requestedMusicClip = null;
 
@@ -283,6 +293,7 @@ public class AudioManager : MonoBehaviour
         if (musicSource == null)
             return;
 
+        //keep requested vol in sync for later recoveries/restarts
         requestedMusicVolume = Mathf.Clamp01(targetVolume);
         StartMusicFade(requestedMusicVolume, duration, stopAtEnd: false);
     }
@@ -350,6 +361,7 @@ public class AudioManager : MonoBehaviour
 
     public void SetMusicVolume(float value)
     {
+        // Keep requested volume in sync with slider updates.
         musicVolume = Mathf.Clamp01(value);
         requestedMusicVolume = musicVolume;
         ApplyVolumes();
@@ -388,6 +400,7 @@ public class AudioManager : MonoBehaviour
 
     private void SaveVolumes()
     {
+        // Persist user mix so menu/in-game settings survive relaunch.
         PlayerPrefs.SetFloat(MusicVolumePrefKey, musicVolume);
         PlayerPrefs.SetFloat(SfxVolumePrefKey, sfxVolume);
         PlayerPrefs.SetFloat(UiVolumePrefKey, uiVolume);
@@ -430,6 +443,7 @@ public class AudioManager : MonoBehaviour
 #if UNITY_WEBGL
     private void TryRecoverWebGlMusicPlayback()
     {
+        //Browsers can block audio until user input; retry once a gesture is detected
         if (!musicRequested || musicSource == null)
         {
             return;

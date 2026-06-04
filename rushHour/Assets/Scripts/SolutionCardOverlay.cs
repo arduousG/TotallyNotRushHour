@@ -94,6 +94,7 @@ public class SolutionCardOverlay : MonoBehaviour
         EnsurePuzzleReference(logIfMissing: true);
         if (puzzle != null)
         {
+            //repaint overlay when PuzzleController swaps to a new level
             puzzle.LevelLoaded += OnPuzzleLevelLoaded;
         }
 
@@ -163,6 +164,7 @@ public class SolutionCardOverlay : MonoBehaviour
 
     public void ToggleOverlay()
     {
+        //shared path for hotkey + any UI button toggles
         isVisible = !isVisible;
         if (root != null)
         {
@@ -172,6 +174,7 @@ public class SolutionCardOverlay : MonoBehaviour
         AudioManager audioManager = AudioManager.Instance;
         if (audioManager != null)
         {
+            //reuse UI click SFX for overlay open/close feedback
             audioManager.PlayUIClick();
         }
 
@@ -183,6 +186,7 @@ public class SolutionCardOverlay : MonoBehaviour
 
     public void ShowOverlay()
     {
+        //keep Show/Hide paths routed through one toggle implementation
         if (isVisible)
         {
             return;
@@ -193,6 +197,7 @@ public class SolutionCardOverlay : MonoBehaviour
 
     public void HideOverlay()
     {
+        //keep Show/Hide paths routed through one toggle implementation
         if (!isVisible)
         {
             return;

@@ -132,6 +132,7 @@ public class CarController : MonoBehaviour
 
     void OnMouseDown()
     {
+        //ignore world selection when pointer is over UI (sliders/buttons)
         if (IsPointerOverUi())
         {
             return;
@@ -203,6 +204,7 @@ public class CarController : MonoBehaviour
         if(puzzle != null && puzzle.IsGameWon)
             return;
 
+        //prevent dragging cars while adjusting UI controls
         if (IsPointerOverUi())
         {
             return;
@@ -245,6 +247,7 @@ public class CarController : MonoBehaviour
             return false;
         }
 
+        //touch-safe check for mobile/WebGL pointer ids
         if (Input.touchCount > 0)
         {
             for (int i = 0; i < Input.touchCount; i++)

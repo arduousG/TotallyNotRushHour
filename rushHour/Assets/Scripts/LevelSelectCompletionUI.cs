@@ -108,6 +108,7 @@ public class LevelSelectCompletionUI : MonoBehaviour
 
             entry.button.onClick.AddListener(delegate
             {
+                //mirror menu click feedback even if generic binder is missing on this branch
                 AudioManager audioManager = AudioManager.Instance;
                 if (audioManager != null)
                 {
