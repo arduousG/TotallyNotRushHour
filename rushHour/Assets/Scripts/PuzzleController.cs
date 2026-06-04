@@ -101,7 +101,9 @@ public class PuzzleController : MonoBehaviour
     private CarController lastScoredMoveCar;
     private Vector2Int lastScoredMoveDirection;
 
+    // Runtime occupancy map used for collision and movement validation.
     private CarController[,] grid;
+    // Stores each car's starting position for puzzle resets.
     private Dictionary<CarController, Vector2Int> startingPositions = 
         new Dictionary<CarController, Vector2Int>();
     // keep refs to spawned cars so level swap can clear clean
@@ -773,6 +775,7 @@ public class PuzzleController : MonoBehaviour
         return ParseBoard(board);
     }
 
+    // Converts compact board strings into runtime car definitions.
     CarSpawnData[] ParseBoard(string board)
     {
         int cellCount = boardWidth * boardHeight;
@@ -984,6 +987,7 @@ public class PuzzleController : MonoBehaviour
 
             if (!IsInsideBoard(cell))
             {
+                // Main car may legally occupy the exit cell outside the board bounds.
                 if (!IsExitCell(cell, car))
                 {
                     return false;
@@ -1143,6 +1147,7 @@ public class PuzzleController : MonoBehaviour
 
         grid = new CarController[boardWidth, boardHeight];
 
+        // Restore every car to its original spawn position.
         foreach (var pair in startingPositions)
         {
             CarController car = pair.Key;
@@ -1216,6 +1221,7 @@ public class PuzzleController : MonoBehaviour
         lastHighlightOrigin = selected.gridPosition;
     }
 
+    // Find every reachable stopping position along the car's movement axis.
     List<Vector2Int> GetValidOriginsForCar(CarController car)
     {
         List<Vector2Int> origins = new List<Vector2Int>();
@@ -1572,6 +1578,7 @@ public class PuzzleController : MonoBehaviour
         }
     }
 
+    // Persist completion status separately for each difficulty/level pair.
     string BuildCompletionPrefKey(Diff diff, int levelIndex)
     {
         return CompletionPrefKeyPrefix + "." + (int)diff + "." + levelIndex;

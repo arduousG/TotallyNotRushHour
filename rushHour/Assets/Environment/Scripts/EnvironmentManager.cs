@@ -86,6 +86,7 @@ public class EnvironmentManager : MonoBehaviour
         DisableEndlessSky();
         HideEnvironment();
 
+        // Select the biome prefab associated with the chosen difficulty.
         GameObject envToLoad = null;
 
         switch(diff)

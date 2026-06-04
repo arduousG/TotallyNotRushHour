@@ -35,21 +35,22 @@ public class CarController : MonoBehaviour
     }
 
     public void GetOccupiedCells(Vector2Int origin, List<Vector2Int> results)
-{
-    results.Clear();
-
-    for (int i = 0; i < length; i++)
     {
-        if (isHorizontal)
+        results.Clear();
+
+        // Build the list of grid cells occupied by this car from a given origin.
+        for (int i = 0; i < length; i++)
         {
-            results.Add(new Vector2Int(origin.x + i, origin.y));
-        }
-        else
-        {
-            results.Add(new Vector2Int(origin.x, origin.y + i));
+            if (isHorizontal)
+            {
+                results.Add(new Vector2Int(origin.x + i, origin.y));
+            }
+            else
+            {
+                results.Add(new Vector2Int(origin.x, origin.y + i));
+            }
         }
     }
-}
 
     void Update()
     {
@@ -59,6 +60,7 @@ public class CarController : MonoBehaviour
         if (!selected)
             return;
 
+        // Only the selected car responds to keyboard movement.
         HandleMovement();
     }
 
@@ -95,6 +97,7 @@ public class CarController : MonoBehaviour
     {
         Vector2Int newOrigin = gridPosition + direction;
 
+        // Reject moves that would collide with another car or leave the board.
         if (!puzzle.CanPlaceCar(this, newOrigin))
         {
             if (Time.time - lastInvalidMoveSfxTime >= InvalidMoveSfxCooldown)
@@ -180,6 +183,7 @@ public class CarController : MonoBehaviour
 
     Vector3 GridToWorld(Vector2Int gridPosition)
     {
+        // Offset the model so it is centered across the tiles it occupies.
         float xOffset = tileSpacing / 2f;
         float zOffset = tileSpacing / 2f;
 
